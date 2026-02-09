@@ -42,3 +42,4 @@ L'intégration de **Cloudinary** est recommandée pour servir les partitions et 
 
 ---
 © 2026 MonChoeur Project - En développement actif.
+# MonChoeur
