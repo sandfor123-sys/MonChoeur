@@ -1,0 +1,22 @@
+{
+    "name": "monchoeur-frontend",
+    "version": "1.0.0",
+    "description": "Frontend pour la plateforme MonChoeur",
+    "private": true,
+    "scripts": {
+        "start": "node server.js",
+        "dev": "node server.js",
+        "build": "echo 'Build completed'",
+        "test": "echo 'No tests yet'"
+    },
+    "keywords": [
+        "chant",
+        "choral",
+        "liturgie"
+    ],
+    "author": "MonChoeur Team",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.18.2"
+    }
+}
