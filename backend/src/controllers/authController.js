@@ -79,3 +79,34 @@ exports.getProfile = async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 };
+exports.initAdmin = async (req, res) => {
+    try {
+        const adminEmail = 'admin@monchoeur.fr';
+        const adminUsername = 'admin';
+        const adminPassword = 'admin';
+
+        const exists = await User.exists(adminEmail, adminUsername);
+
+        if (exists) {
+            return res.status(400).json({ message: 'L\'admin existe déjà.' });
+        }
+
+        await User.create({
+            username: adminUsername,
+            email: adminEmail,
+            password: adminPassword,
+            role: 'admin'
+        });
+
+        res.json({
+            message: 'Admin créé avec succès !',
+            credentials: {
+                email: adminEmail,
+                password: adminPassword
+            }
+        });
+    } catch (error) {
+        console.error('Init admin error:', error);
+        res.status(500).json({ error: 'Erreur lors de l\'initialisation de l\'admin. Vérifiez que la base de données est lancée.' });
+    }
+};

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS chants (
     titre VARCHAR(200) NOT NULL,
     compositeur VARCHAR(100),
     parolier VARCHAR(100),
-    categorie ENUM('entree', 'kyrie', 'gloria', 'alleluia', 'offertoire', 'sanctus', 'agnus', 'communion', 'envoi', 'autre') NOT NULL,
+    categorie ENUM('entree', 'kyrie', 'gloria', 'alleluia', 'psaume', 'priere_universelle', 'offertoire', 'sanctus', 'agnus', 'communion', 'envoi', 'autre') NOT NULL,
     temps_liturgique ENUM('avent', 'noel', 'careme', 'paques', 'pentecote', 'ordinaire', 'tous') DEFAULT 'tous',
     difficulte ENUM('facile', 'moyen', 'difficile') DEFAULT 'moyen',
     duree INT COMMENT 'Durée en secondes',

@@ -18,7 +18,7 @@ async function renderPlaylists() {
 
     document.getElementById('btnLoginRequired').addEventListener('click', () => {
       // TODO: Show login modal
-      alert('Formulaire de connexion à implémenter');
+      toast.info('Formulaire de connexion à implémenter');
     });
 
     return;
@@ -113,10 +113,10 @@ async function createPlaylist() {
 
   try {
     await api.playlists.create({ nom, description });
-    alert('Playlist créée avec succès !');
+    toast.success('Playlist créée avec succès !');
     loadPlaylists();
   } catch (error) {
-    alert('Erreur lors de la création: ' + error.message);
+    toast.error('Erreur lors de la création: ' + error.message);
   }
 }
 
@@ -134,24 +134,120 @@ async function deletePlaylist(playlistId) {
 
   try {
     await api.playlists.delete(playlistId);
-    alert('Playlist supprimée');
+    toast.success('Playlist supprimée');
     loadPlaylists();
   } catch (error) {
     console.error('Error deleting playlist:', error);
-    alert('Erreur lors de la suppression: ' + error.message);
+    toast.error('Erreur lors de la suppression: ' + error.message);
   }
 }
 
 // View playlist details
-function viewPlaylist(playlistId) {
-  router.navigate(`#playlist/${playlistId}`);
+async function renderPlaylistDetail(playlistId) {
+  const app = document.getElementById('app');
+
+  if (!playlistId) {
+    router.navigate('#playlists');
+    return;
+  }
+
+  app.innerHTML = '<div class="container"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement de la playlist...</div></div>';
+
+  try {
+    const playlist = await api.playlists.getById(playlistId);
+
+    app.innerHTML = `
+      <div class="playlist-detail-page">
+        <div class="container">
+          <div class="page-header d-flex justify-between align-center">
+            <div>
+              <button class="btn btn-sm btn-outline mb-3" onclick="router.navigate('#playlists')">
+                <i class="fas fa-arrow-left"></i> Retour aux playlists
+              </button>
+              <h1><i class="fas fa-list"></i> ${playlist.nom}</h1>
+              <p>${playlist.description || 'Aucune description'}</p>
+            </div>
+            <div class="playlist-detail-actions">
+              <button class="btn btn-outline" onclick="showEditPlaylistModal(${playlist.id})">
+                <i class="fas fa-edit"></i> Modifier
+              </button>
+            </div>
+          </div>
+
+          <div id="playlistChantsContainer" class="chants-grid">
+            ${playlist.chants && playlist.chants.length > 0 ?
+        playlist.chants.map(chant => `
+                <div class="chant-card" data-id="${chant.id}">
+                  <div class="chant-card-header">
+                    <h3 class="chant-title">${chant.titre}</h3>
+                    <span class="chant-category">${chant.categorie}</span>
+                  </div>
+                  <div class="chant-card-body">
+                    <p class="chant-composer"><i class="fas fa-user"></i> ${chant.compositeur || 'Anonyme'}</p>
+                    <div class="chant-meta font-sm">
+                      <span>Ajouté le ${new Date(chant.added_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  </div>
+                  <div class="chant-card-footer">
+                    <button class="btn btn-sm btn-primary" onclick="playChant(${chant.id})">
+                      <i class="fas fa-play"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="viewChant(${chant.id})">
+                      Détails
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-icon" onclick="removeChantFromPlaylist(${playlist.id}, ${chant.id})" title="Retirer de la playlist">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                  </div>
+                </div>
+              `).join('') :
+        '<p class="text-center w-100">Aucun chant dans cette playlist. <a href="#catalogue">Parcourir le catalogue</a> pour en ajouter.</p>'
+      }
+          </div>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error loading playlist detail:', error);
+    app.innerHTML = '<div class="container"><div class="error">Erreur lors du chargement de la playlist.</div></div>';
+  }
 }
 
-// Export functions
-window.createPlaylist = createPlaylist;
-window.editPlaylist = editPlaylist;
-window.deletePlaylist = deletePlaylist;
-window.viewPlaylist = viewPlaylist;
+// Show edit playlist modal
+async function showEditPlaylistModal(id) {
+  try {
+    const playlist = await api.playlists.getById(id);
+    const newNom = prompt('Nouveau nom:', playlist.nom);
+    if (newNom === null) return;
 
-// Register route
+    const newDesc = prompt('Nouvelle description:', playlist.description || '');
+    if (newDesc === null) return;
+
+    await api.playlists.update(id, { nom: newNom, description: newDesc, is_public: playlist.is_public });
+    toast.success('Playlist mise à jour !');
+    renderPlaylistDetail(id);
+  } catch (error) {
+    toast.error('Erreur: ' + error.message);
+  }
+}
+
+// Remove chant from playlist
+async function removeChantFromPlaylist(playlistId, chantId) {
+  if (!confirm('Voulez-vous retirer ce chant de la playlist ?')) return;
+
+  try {
+    await api.playlists.removeChant(playlistId, chantId);
+    toast.success('Chant retiré');
+    renderPlaylistDetail(playlistId);
+  } catch (error) {
+    toast.error('Erreur: ' + error.message);
+  }
+}
+
+// Global scope
+window.showEditPlaylistModal = showEditPlaylistModal;
+window.removeChantFromPlaylist = removeChantFromPlaylist;
+
+// Register routes
 router.register('playlists', renderPlaylists);
+router.register('playlist', renderPlaylistDetail);

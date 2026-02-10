@@ -3,31 +3,33 @@
    =================================== */
 :root {
   /* Couleurs principales - Thème liturgique */
-  --color-primary: #6B46C1;        /* Violet liturgique */
+  --color-primary: #6B46C1;
+  /* Violet liturgique */
   --color-primary-dark: #553C9A;
   --color-primary-light: #9F7AEA;
-  
-  --color-secondary: #D4AF37;      /* Or liturgique */
+
+  --color-secondary: #D4AF37;
+  /* Or liturgique */
   --color-secondary-dark: #B8941F;
   --color-secondary-light: #F0D98B;
-  
+
   /* Couleurs neutres */
   --color-dark: #1A202C;
   --color-dark-light: #2D3748;
   --color-gray: #718096;
   --color-gray-light: #E2E8F0;
   --color-white: #FFFFFF;
-  
+
   /* Couleurs d'état */
   --color-success: #48BB78;
   --color-error: #F56565;
   --color-warning: #ED8936;
   --color-info: #4299E1;
-  
+
   /* Typographie */
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Inter', sans-serif;
-  
+
   /* Espacements */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -35,19 +37,19 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  
+
   /* Bordures */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-full: 9999px;
-  
+
   /* Ombres */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
+
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
   --transition-base: 300ms ease-in-out;
@@ -76,19 +78,41 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: 600;
   line-height: 1.2;
   margin-bottom: var(--spacing-md);
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.5rem; }
-h5 { font-size: 1.25rem; }
-h6 { font-size: 1rem; }
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
 
 a {
   color: var(--color-primary);
@@ -116,19 +140,49 @@ img {
   padding: 0 var(--spacing-lg);
 }
 
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+  text-align: center;
+}
 
-.mt-1 { margin-top: var(--spacing-sm); }
-.mt-2 { margin-top: var(--spacing-md); }
-.mt-3 { margin-top: var(--spacing-lg); }
-.mt-4 { margin-top: var(--spacing-xl); }
+.text-left {
+  text-align: left;
+}
 
-.mb-1 { margin-bottom: var(--spacing-sm); }
-.mb-2 { margin-bottom: var(--spacing-md); }
-.mb-3 { margin-bottom: var(--spacing-lg); }
-.mb-4 { margin-bottom: var(--spacing-xl); }
+.text-right {
+  text-align: right;
+}
+
+.mt-1 {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-2 {
+  margin-top: var(--spacing-md);
+}
+
+.mt-3 {
+  margin-top: var(--spacing-lg);
+}
+
+.mt-4 {
+  margin-top: var(--spacing-xl);
+}
+
+.mb-1 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-2 {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-3 {
+  margin-bottom: var(--spacing-lg);
+}
+
+.mb-4 {
+  margin-bottom: var(--spacing-xl);
+}
 
 /* ===================================
    BUTTONS
@@ -196,6 +250,8 @@ img {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .nav-brand i {
@@ -319,4 +375,17 @@ img {
 #app {
   min-height: calc(100vh - 200px);
   padding: var(--spacing-xl) 0;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

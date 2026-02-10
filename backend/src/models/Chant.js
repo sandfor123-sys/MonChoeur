@@ -1,80 +1,163 @@
-const db = require('../config/database');
+const { supabase, handleResponse } = require('../config/database');
 
 class Chant {
     static async findAll(filters = {}) {
-        let sql = 'SELECT * FROM chants WHERE 1=1';
-        const params = [];
+        let query = supabase.from('chants').select('*');
 
         if (filters.categorie) {
-            sql += ' AND categorie = ?';
-            params.push(filters.categorie);
+            query = query.eq('categorie', filters.categorie);
         }
 
         if (filters.temps_liturgique) {
-            sql += ' AND temps_liturgique = ?';
-            params.push(filters.temps_liturgique);
+            query = query.eq('temps_liturgique', filters.temps_liturgique);
         }
 
         if (filters.difficulte) {
-            sql += ' AND difficulte = ?';
-            params.push(filters.difficulte);
+            query = query.eq('difficulte', filters.difficulte);
         }
 
         if (filters.search) {
-            sql += ' AND titre LIKE ?';
-            params.push(`%${filters.search}%`);
+            query = query.ilike('titre', `%${filters.search}%`);
         }
 
-        sql += ' ORDER BY created_at DESC';
+        query = query.order('created_at', { ascending: false });
 
-        return await db.query(sql, params);
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
     }
 
     static async findById(id) {
-        const rows = await db.query('SELECT * FROM chants WHERE id = ?', [id]);
-        const chant = rows[0];
+        const { data: chant, error: chantError } = await supabase
+            .from('chants')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (chantError && chantError.code !== 'PGRST116') throw chantError;
 
         if (chant) {
             // Fetch associated audio files
-            chant.audio = await db.query('SELECT * FROM audio_files WHERE chant_id = ?', [id]);
+            const { data: audio, error: audioError } = await supabase
+                .from('audio_files')
+                .select('*')
+                .eq('chant_id', id);
+
+            if (audioError) throw audioError;
+            chant.audio = audio;
+
             // Fetch associated partitions
-            chant.partitions = await db.query('SELECT * FROM partitions WHERE chant_id = ?', [id]);
+            const { data: partitions, error: partitionsError } = await supabase
+                .from('partitions')
+                .select('*')
+                .eq('chant_id', id);
+
+            if (partitionsError) throw partitionsError;
+            chant.partitions = partitions;
         }
 
         return chant;
     }
 
     static async create(data) {
-        const result = await db.query(
-            'INSERT INTO chants (titre, compositeur, parolier, categorie, temps_liturgique, difficulte, paroles, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [data.titre, data.compositeur, data.parolier, data.categorie, data.temps_liturgique, data.difficulte, data.paroles, data.description]
-        );
-        return result.insertId;
+        const { data: rows, error } = await supabase
+            .from('chants')
+            .insert([{
+                titre: data.titre,
+                compositeur: data.compositeur,
+                parolier: data.parolier,
+                categorie: data.categorie,
+                temps_liturgique: data.temps_liturgique,
+                difficulte: data.difficulte,
+                paroles: data.paroles,
+                description: data.description
+            }])
+            .select();
+
+        if (error) throw error;
+        return rows[0].id;
     }
 
     static async update(id, data) {
-        return await db.query(
-            'UPDATE chants SET titre=?, compositeur=?, parolier=?, categorie=?, temps_liturgique=?, difficulte=?, paroles=?, description=? WHERE id=?',
-            [data.titre, data.compositeur, data.parolier, data.categorie, data.temps_liturgique, data.difficulte, data.paroles, data.description, id]
-        );
+        const { error } = await supabase
+            .from('chants')
+            .update({
+                titre: data.titre,
+                compositeur: data.compositeur,
+                parolier: data.parolier,
+                categorie: data.categorie,
+                temps_liturgique: data.temps_liturgique,
+                difficulte: data.difficulte,
+                paroles: data.paroles,
+                description: data.description
+            })
+            .eq('id', id);
+
+        if (error) throw error;
+        return true;
     }
 
     static async delete(id) {
-        return await db.query('DELETE FROM chants WHERE id = ?', [id]);
+        const { error } = await supabase
+            .from('chants')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return true;
     }
 
-    static async addAudio(chantId, data) {
-        return await db.query(
-            'INSERT INTO audio_files (chant_id, type, voix, fichier_url, fichier_nom) VALUES (?, ?, ?, ?, ?)',
-            [chantId, data.type || 'complet', data.voix || 'aucune', data.url, data.nom || 'audio']
-        );
+    static async addAudio(chant_id, data) {
+        const { error } = await supabase
+            .from('audio_files')
+            .insert([{
+                chant_id,
+                type: data.type || 'complet',
+                voix: data.voix || 'aucune',
+                fichier_url: data.url,
+                fichier_nom: data.nom || 'audio'
+            }]);
+
+        if (error) throw error;
+        return true;
     }
 
-    static async addPartition(chantId, data) {
-        return await db.query(
-            'INSERT INTO partitions (chant_id, voix, fichier_url, fichier_nom) VALUES (?, ?, ?, ?)',
-            [chantId, data.voix || 'complete', data.url, data.nom || 'partition']
-        );
+    static async addPartition(chant_id, data) {
+        const { error } = await supabase
+            .from('partitions')
+            .insert([{
+                chant_id,
+                voix: data.voix || 'complete',
+                fichier_url: data.url,
+                fichier_nom: data.nom || 'partition'
+            }]);
+
+        if (error) throw error;
+        return true;
+    }
+
+    static async deleteAudio(id) {
+        const { error } = await supabase.from('audio_files').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    }
+
+    static async deletePartition(id) {
+        const { error } = await supabase.from('partitions').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    }
+
+    static async deleteAllAudio(chant_id) {
+        const { error } = await supabase.from('audio_files').delete().eq('chant_id', chant_id);
+        if (error) throw error;
+        return true;
+    }
+
+    static async deleteAllPartitions(chant_id) {
+        const { error } = await supabase.from('partitions').delete().eq('chant_id', chant_id);
+        if (error) throw error;
+        return true;
     }
 }
 

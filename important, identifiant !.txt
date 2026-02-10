@@ -1,0 +1,5 @@
+Identifiant Superbase du projet mon choeur
+
+fNnmxVEJCwPZuCKF
+
+{"message":"Admin créé avec succès !","credentials":{"email":"admin@monchoeur.fr","password":"admin"}}

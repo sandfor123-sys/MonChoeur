@@ -1,48 +1,71 @@
-# 🎵 MonChoeur - Plateforme d'Apprentissage de Chant Choral
+# 🎵 MonChoeur - Plateforme de Chants Choraux
 
-**MonChoeur** est une application web moderne destinée à faciliter l'apprentissage des chants liturgiques. Elle permet aux choristes et chefs de chœur de centraliser, écouter et pratiquer leur répertoire.
+MonChoeur est une Single Page Application (SPA) moderne permettant de gérer et d'apprendre des chants choraux pour la liturgie.
 
-## 🌟 Fonctionnalités Clés
-- **Catalogue Liturgique** : Recherchez des chants par catégorie, temps liturgique ou difficulté.
-- **Apprentissage Audio** : Écoutez les différentes voix pour parfaire votre pratique.
-- **Playlists Personnalisées** : Créez vos propres listes pour préparer vos répétition et messes.
-- **Accès Sécurisé** : Espace personnel protégé pour chaque utilisateur.
+## 🚀 Fonctionnalités Termineés
 
-## 🛠️ Stack Technique
-- **Frontend** : JavaScript Vanilla (Architecture SPA), CSS3 (Design System dédié).
-- **Backend** : Node.js / Express.js.
-- **Base de Données** : MySQL (Prêt pour le Cloud).
-- **Authentification** : JWT (Json Web Tokens) & Bcrypt.
+- **Catalogue** : Recherche et filtrage des chants par catégorie et temps liturgique.
+- **Détails** : Paroles complètes, affichage et téléchargement de partitions PDF.
+- **Lecteur Audio** : Lecteur persistant permettant d'écouter les différentes voix (Cloudinary).
+- **Playlists** : Création et gestion de listes de lecture personnalisées.
+- **Administration** : Dashboard complet pour ajouter/modifier des chants avec upload de fichiers.
+- **Notifications** : Système de toast notifications moderne.
 
-## 🚀 Déploiement & Cloud
+## 🛠️ Installation
 
-Le projet est conçu pour être déployé sur **Vercel** avec une base de données managée.
+### 1. Backend
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Remplissez vos accès MySQL et Cloudinary dans le .env
+npm run dev
+```
 
-### 1. Backend (Serverless)
-Configuré pour fonctionner comme des fonctions Cloud Vercel via `vercel.json`.
+### 2. Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Le projet sera accessible sur `http://localhost:3001`.
 
-### 2. Base de Données
-Compatible avec tout fournisseur MySQL Cloud (ex: **Aiven**, **PlanetScale**).
-Le schéma est disponible dans `database/schema.sql`.
+## 🚀 Déploiement sur Vercel
 
-### 3. Stockage Média
-L'intégration de **Cloudinary** est recommandée pour servir les partitions et fichiers audio de manière persistante.
+Le projet est configuré pour être déployé sur Vercel.
 
-## 📖 Guides
-- [Plan d'Implémentation](.gemini/antigravity/brain/56780723-5849-45be-8d6d-509cedf64e21/implementation_plan.md)
-- [Guide de Déploiement Vercel](.gemini/antigravity/brain/56780723-5849-45be-8d6d-509cedf64e21/deployment_guide.md)
-- [Walkthrough de l'API](.gemini/antigravity/brain/56780723-5849-45be-8d6d-509cedf64e21/walkthrough.md)
+### 1. Importer les variables d'environnement (.env)
 
-## 💻 Installation Locale
-1. Clonez le dépôt.
-2. Configurez votre `.env` backend (voir `.env.example`).
-3. Installez les dépendances : `npm install` dans frontend et backend.
-4. Lancez le backend : `cd backend && npm run dev`
-5. Lancez le frontend : `cd frontend && npm start`
+Pour importer vos clés rapidement :
+```bash
+# Installez la CLI
+npm install -g vercel
 
----
-© 2026 MonChoeur Project - En développement actif.
-# MonChoeur
-# MonChoeur
-# MonChoeur
-# MonChoeur
+# Reliez le projet
+vercel link
+
+# Ajoutez vos variables
+vercel env add SUPABASE_URL < .env
+vercel env add SUPABASE_ANON_KEY < .env
+vercel env add CLOUDINARY_CLOUD_NAME < .env
+vercel env add CLOUDINARY_API_KEY < .env
+vercel env add CLOUDINARY_API_SECRET < .env
+vercel env add JWT_SECRET < .env
+```
+
+### 2. Déployer
+```bash
+vercel --prod
+```
+
+## ☁️ Configuration Cloudinary
+
+Pour que l'upload fonctionne, vous devez créer un compte gratuit sur [Cloudinary](https://cloudinary.com/) et configurer les variables suivantes dans le `.env` du backend :
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+- **Frontend** : Vanilla JS (SPA Router), CSS3.
+- **Backend** : Node.js, Express.
+- **Base de données** : Supabase (PostgreSQL SDK).
+- **Stockage** : Cloudinary (Media).

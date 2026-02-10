@@ -1,32 +1,49 @@
-const db = require('../config/database');
+const { supabase, handleResponse } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class User {
     static async findByEmail(email) {
-        const rows = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        return rows[0];
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        // Supabase returns 406 or error if not found with .single()
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
     }
 
     static async findById(id) {
-        const rows = await db.query('SELECT id, username, email, role, created_at FROM users WHERE id = ?', [id]);
-        return rows[0];
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, username, email, role, created_at')
+            .eq('id', id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
     }
 
     static async create({ username, email, password, role = 'user' }) {
         const passwordHash = await bcrypt.hash(password, 10);
-        const result = await db.query(
-            'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-            [username, email, passwordHash, role]
-        );
-        return result.insertId;
+        const { data, error } = await supabase
+            .from('users')
+            .insert([{ username, email, password_hash: passwordHash, role }])
+            .select();
+
+        if (error) throw error;
+        return data[0].id;
     }
 
     static async exists(email, username) {
-        const rows = await db.query(
-            'SELECT id FROM users WHERE email = ? OR username = ?',
-            [email, username]
-        );
-        return rows.length > 0;
+        const { data, error } = await supabase
+            .from('users')
+            .select('id')
+            .or(`email.eq.${email},username.eq.${username}`);
+
+        if (error) throw error;
+        return data.length > 0;
     }
 }
 

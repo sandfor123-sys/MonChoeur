@@ -1,13 +1,39 @@
 {
     "version": 2,
+    "name": "mon-choeur",
+    "builds": [
+        {
+            "src": "backend/src/server.js",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "frontend/**",
+            "use": "@vercel/static"
+        }
+    ],
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "/backend/src/server.js"
+            "destination": "backend/src/server.js"
+        },
+        {
+            "source": "/uploads/(.*)",
+            "destination": "backend/uploads/$1"
+        },
+        {
+            "source": "/src/(.*)",
+            "destination": "/frontend/src/$1"
+        },
+        {
+            "source": "/assets/(.*)",
+            "destination": "/frontend/public/assets/$1"
         },
         {
             "source": "/(.*)",
             "destination": "/frontend/public/index.html"
         }
-    ]
+    ],
+    "env": {
+        "NODE_ENV": "production"
+    }
 }

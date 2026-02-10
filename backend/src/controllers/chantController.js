@@ -1,4 +1,38 @@
 const Chant = require('../models/Chant');
+const { cloudinary } = require('../config/cloudinary');
+
+// Helper to extract public_id from Cloudinary URL
+const getPublicIdFromUrl = (url) => {
+    if (!url) return null;
+    // URL format: https://res.cloudinary.com/[cloud_name]/[resource_type]/upload/v[version]/[folder]/[public_id].[ext]
+    const parts = url.split('/');
+    const lastPart = parts[parts.length - 1];
+    const publicIdWithExt = lastPart.split('.')[0];
+
+    // We also need the folder(s) if any
+    // Looking at cloudinary.js: folder is 'monchoeur/audio' or 'monchoeur/partitions'
+    const uploadIndex = parts.indexOf('upload');
+    if (uploadIndex !== -1) {
+        // Everything between 'v[version]' and the last part is the folder
+        const folderParts = parts.slice(uploadIndex + 2, parts.length - 1);
+        return [...folderParts, publicIdWithExt].join('/');
+    }
+    return publicIdWithExt;
+};
+
+// Helper to delete from Cloudinary
+const deleteFilesFromCloudinary = async (files, resourceType = 'auto') => {
+    for (const file of files) {
+        const publicId = getPublicIdFromUrl(file.fichier_url);
+        if (publicId) {
+            try {
+                await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+            } catch (error) {
+                console.error(`Error deleting ${publicId} from Cloudinary:`, error);
+            }
+        }
+    }
+};
 
 exports.getChants = async (req, res) => {
     try {
@@ -31,21 +65,30 @@ exports.createChant = async (req, res) => {
 
         // Handle uploaded files from Cloudinary
         if (req.files) {
-            if (req.files.audio) {
-                const audioFile = req.files.audio[0];
-                await Chant.addAudio(chantId, {
-                    url: audioFile.path,
-                    nom: audioFile.originalname,
-                    type: 'complet'
-                });
+            const voiceFields = ['audio_complet', 'audio_soprano', 'audio_alto', 'audio_tenor', 'audio_basse'];
+
+            for (const field of voiceFields) {
+                if (req.files[field]) {
+                    const voice = field === 'audio_complet' ? 'toutes' : field.split('_')[1];
+                    const type = field === 'audio_complet' ? 'complet' : 'voix_separee';
+
+                    await Chant.addAudio(chantId, {
+                        url: req.files[field][0].path,
+                        nom: req.files[field][0].originalname,
+                        type: type,
+                        voix: voice
+                    });
+                }
             }
+
             if (req.files.partition) {
-                const partitionFile = req.files.partition[0];
-                await Chant.addPartition(chantId, {
-                    url: partitionFile.path,
-                    nom: partitionFile.originalname,
-                    voix: 'complete'
-                });
+                for (const partitionFile of req.files.partition) {
+                    await Chant.addPartition(chantId, {
+                        url: partitionFile.path,
+                        nom: partitionFile.originalname,
+                        voix: 'complete'
+                    });
+                }
             }
         }
 
@@ -64,21 +107,49 @@ exports.updateChant = async (req, res) => {
 
         // Handle new uploaded files
         if (req.files) {
-            if (req.files.audio) {
-                const audioFile = req.files.audio[0];
-                await Chant.addAudio(chantId, {
-                    url: audioFile.path,
-                    nom: audioFile.originalname,
-                    type: 'complet'
-                });
+            const currentChant = await Chant.findById(chantId);
+            const voiceFields = ['audio_complet', 'audio_soprano', 'audio_alto', 'audio_tenor', 'audio_basse'];
+
+            let hasNewAudio = false;
+            for (const field of voiceFields) {
+                if (req.files[field]) hasNewAudio = true;
             }
+
+            if (hasNewAudio) {
+                // Delete existing audio files before replacing
+                if (currentChant.audio && currentChant.audio.length > 0) {
+                    await deleteFilesFromCloudinary(currentChant.audio, 'video');
+                    await Chant.deleteAllAudio(chantId);
+                }
+
+                for (const field of voiceFields) {
+                    if (req.files[field]) {
+                        const voice = field === 'audio_complet' ? 'toutes' : field.split('_')[1];
+                        const type = field === 'audio_complet' ? 'complet' : 'voix_separee';
+
+                        await Chant.addAudio(chantId, {
+                            url: req.files[field][0].path,
+                            nom: req.files[field][0].originalname,
+                            type: type,
+                            voix: voice
+                        });
+                    }
+                }
+            }
+
             if (req.files.partition) {
-                const partitionFile = req.files.partition[0];
-                await Chant.addPartition(chantId, {
-                    url: partitionFile.path,
-                    nom: partitionFile.originalname,
-                    voix: 'complete'
-                });
+                if (currentChant.partitions && currentChant.partitions.length > 0) {
+                    await deleteFilesFromCloudinary(currentChant.partitions, 'raw');
+                    await Chant.deleteAllPartitions(chantId);
+                }
+
+                for (const partitionFile of req.files.partition) {
+                    await Chant.addPartition(chantId, {
+                        url: partitionFile.path,
+                        nom: partitionFile.originalname,
+                        voix: 'complete'
+                    });
+                }
             }
         }
 
@@ -100,8 +171,22 @@ exports.deleteChant = async (req, res) => {
         if (!chant) {
             return res.status(404).json({ error: 'Chant non trouvé' });
         }
+
+        // 1. Delete audio files from Cloudinary
+        if (chant.audio && chant.audio.length > 0) {
+            await deleteFilesFromCloudinary(chant.audio, 'video');
+        }
+
+        // 2. Delete partitions from Cloudinary
+        if (chant.partitions && chant.partitions.length > 0) {
+            await deleteFilesFromCloudinary(chant.partitions, 'raw');
+        }
+
+        // 3. Delete from database (Cascade deletes will handle audio_files and partitions if configured, but let's be explicit if needed or trust DB)
+        // The schema has ON DELETE CASCADE, so deleting from chants is enough.
         await Chant.delete(req.params.id);
-        res.json({ message: 'Chant supprimé avec succès' });
+
+        res.json({ message: 'Chant et fichiers associés supprimés avec succès' });
     } catch (error) {
         console.error('Delete chant error:', error);
         res.status(500).json({ error: 'Erreur lors de la suppression du chant' });

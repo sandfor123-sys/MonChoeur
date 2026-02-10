@@ -1,47 +1,39 @@
-const mysql = require('mysql2/promise');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-// Database configuration
-const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'monchoeur',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-};
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-// Create connection pool
-const pool = mysql.createPool(dbConfig);
+if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ SUPABASE_URL ou SUPABASE_ANON_KEY manquant dans le fichier .env');
+}
 
-// Test connection
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Test connection (Supabase doesn't have a direct "ping", so we query a health table or just check if the client is init)
 async function testConnection() {
     try {
-        const connection = await pool.getConnection();
-        console.log('✅ Connexion à la base de données réussie');
-        connection.release();
+        const { data, error } = await supabase.from('users').select('id').limit(1);
+        if (error) throw error;
+        console.log('✅ Connexion à Supabase via le SDK réussie');
         return true;
     } catch (error) {
-        console.error('❌ Erreur de connexion à la base de données:', error.message);
+        console.error('❌ Erreur de connexion à Supabase (SDK):', error.message);
         return false;
     }
 }
 
-// Execute query
-async function query(sql, params) {
-    try {
-        const [results] = await pool.execute(sql, params);
-        return results;
-    } catch (error) {
-        console.error('Erreur lors de l\'exécution de la requête:', error);
+// Helper to handle Supabase responses
+const handleResponse = ({ data, error }) => {
+    if (error) {
+        console.error('Supabase Error:', error);
         throw error;
     }
-}
+    return data;
+};
 
 module.exports = {
-    pool,
-    query,
-    testConnection
+    supabase,
+    testConnection,
+    handleResponse
 };

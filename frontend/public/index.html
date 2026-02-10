@@ -1,52 +1,56 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="MonChoeur - Plateforme d'apprentissage de chants choraux pour la messe">
     <meta name="keywords" content="chant, choral, liturgie, messe, musique, église">
     <meta name="author" content="MonChoeur Team">
-    
+
     <title>MonChoeur - Chants Choraux pour la Messe</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/assets/images/favicon.png">
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="/src/styles/components.css">
     <link rel="stylesheet" href="/src/styles/responsive.css">
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="container">
-            <div class="nav-brand">
+            <a href="#accueil" class="nav-brand">
                 <i class="fas fa-music"></i>
                 <span>MonChœur</span>
-            </div>
-            
+            </a>
+
             <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            
+
             <ul class="nav-menu" id="navMenu">
                 <li><a href="#accueil" class="nav-link active">Accueil</a></li>
                 <li><a href="#catalogue" class="nav-link">Catalogue</a></li>
                 <li><a href="#playlists" class="nav-link">Mes Playlists</a></li>
                 <li><a href="#apropos" class="nav-link">À Propos</a></li>
             </ul>
-            
+
             <div class="nav-actions">
                 <button class="btn btn-outline" id="btnLogin">Connexion</button>
                 <button class="btn btn-primary" id="btnRegister">S'inscrire</button>
@@ -59,6 +63,24 @@
         <!-- Content will be dynamically loaded here -->
     </main>
 
+    <!-- Playlist Modal -->
+    <div id="playlistModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2>Ajouter à une playlist</h2>
+                <span class="close-modal" onclick="closePlaylistModal()">&times;</span>
+            </div>
+            <div id="playlistModalBody">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+            </div>
+            <div class="modal-footer mt-4">
+                <button class="btn btn-outline w-100" onclick="createNewPlaylistFromModal()">
+                    <i class="fas fa-plus"></i> Créer une nouvelle playlist
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -67,7 +89,7 @@
                     <h3><i class="fas fa-music"></i> MonChœur</h3>
                     <p>Plateforme d'apprentissage de chants choraux pour la messe</p>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4>Navigation</h4>
                     <ul>
@@ -76,7 +98,7 @@
                         <li><a href="#playlists">Playlists</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4>Ressources</h4>
                     <ul>
@@ -85,7 +107,7 @@
                         <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="footer-section">
                     <h4>Suivez-nous</h4>
                     <div class="social-links">
@@ -96,7 +118,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="footer-bottom">
                 <p>&copy; 2026 MonChœur. Tous droits réservés.</p>
             </div>
@@ -106,12 +128,16 @@
     <!-- Scripts -->
     <script src="/src/utils/api.js"></script>
     <script src="/src/utils/auth.js"></script>
+    <script src="/src/utils/toast.js"></script>
     <script src="/src/utils/router.js"></script>
     <script src="/src/components/AudioPlayer.js"></script>
     <script src="/src/components/ChantCard.js"></script>
     <script src="/src/pages/Accueil.js"></script>
     <script src="/src/pages/Catalogue.js"></script>
     <script src="/src/pages/Playlists.js"></script>
+    <script src="/src/pages/Admin.js"></script>
+    <script src="/src/pages/DetailChant.js"></script>
     <script src="/src/app.js"></script>
 </body>
+
 </html>

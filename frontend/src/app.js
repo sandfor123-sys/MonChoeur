@@ -83,6 +83,7 @@ function updateAuthUI() {
     if (auth.isAuthenticated()) {
         const user = auth.getCurrentUser();
         navActions.innerHTML = `
+      ${auth.isAdmin() ? '<a href="#admin" class="nav-link"><i class="fas fa-cog"></i> Admin</a>' : ''}
       <span class="user-greeting">Bonjour, ${user.username}</span>
       <button class="btn btn-outline" onclick="auth.logout()">
         <i class="fas fa-sign-out-alt"></i> Déconnexion

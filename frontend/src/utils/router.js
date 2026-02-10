@@ -17,25 +17,28 @@ const router = {
 
     // Load and execute route handler
     async loadRoute(path) {
-        // Extract route name from hash or path
-        const route = path.replace('#', '').split('?')[0] || 'accueil';
+        // Extract route path from hash or path
+        const fullPath = path.replace('#', '').split('?')[0] || 'accueil';
+        const parts = fullPath.split('/');
+        const routeName = parts[0];
+        const param = parts[1];
 
-        this.currentRoute = route;
+        this.currentRoute = routeName;
 
         // Update active nav link
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
-            if (link.getAttribute('href') === `#${route}`) {
+            if (link.getAttribute('href') === `#${routeName}`) {
                 link.classList.add('active');
             }
         });
 
         // Execute route handler
-        const handler = this.routes[route];
+        const handler = this.routes[routeName];
         if (handler) {
-            await handler();
+            await handler(param);
         } else {
-            console.warn(`Route not found: ${route}`);
+            console.warn(`Route not found: ${routeName}`);
             this.navigate('#accueil');
         }
     },

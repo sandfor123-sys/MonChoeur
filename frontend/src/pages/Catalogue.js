@@ -18,7 +18,9 @@ async function renderCatalogue() {
               <option value="entree">Entrée</option>
               <option value="kyrie">Kyrie</option>
               <option value="gloria">Gloria</option>
+              <option value="psaume">Psaume</option>
               <option value="alleluia">Alléluia</option>
+              <option value="priere_universelle">Prière Universelle</option>
               <option value="offertoire">Offertoire</option>
               <option value="sanctus">Sanctus</option>
               <option value="agnus">Agnus Dei</option>
