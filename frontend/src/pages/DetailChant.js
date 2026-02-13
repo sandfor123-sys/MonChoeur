@@ -145,44 +145,87 @@ window.playSpecificAudio = playSpecificAudio;
 router.register('chant', renderDetailChant);
 
 // Partition Modal Functions
-window.openPartitionModal = (url, voix) => {
+window.openPartitionModal = async (url, voix) => {
     const modal = document.getElementById('partitionModal');
     const iframe = document.getElementById('pdfViewer');
+    const pdfPagesContainer = document.getElementById('pdfPagesContainer');
     const title = document.getElementById('partitionModalTitle');
     const playBtn = document.getElementById('modalPlayBtn');
+    const overlay = document.getElementById('pdfLoadingOverlay');
 
     if (!modal || !iframe || !title) return;
 
     title.innerText = `Partition - ${voix}`;
 
     // Show loading overlay
-    const overlay = document.getElementById('pdfLoadingOverlay');
     if (overlay) overlay.style.display = 'flex';
 
     // Mobile detection
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
-    if (isMobile) {
-        // On mobile: Show a direct download/open button instead of iframe
-        if (overlay) {
-            overlay.innerHTML = `
-                <div style="text-align: center; padding: var(--spacing-xl);">
-                    <i class="fas fa-file-pdf" style="font-size: 4rem; color: var(--color-primary); margin-bottom: var(--spacing-md);"></i>
-                    <h3 style="margin-bottom: var(--spacing-md);">Partition - ${voix}</h3>
-                    <p style="margin-bottom: var(--spacing-lg); color: var(--color-gray);">
-                        Cliquez sur le bouton ci-dessous pour ouvrir la partition dans votre lecteur PDF.
-                    </p>
-                    <a href="${url}" target="_blank" class="btn btn-primary btn-lg" style="text-decoration: none;">
-                        <i class="fas fa-external-link-alt"></i> Ouvrir la Partition
-                    </a>
-                </div>
-            `;
-            overlay.style.display = 'flex';
-            overlay.style.backgroundColor = 'white';
+    if (isMobile && typeof pdfjsLib !== 'undefined') {
+        // Mobile: Use PDF.js to render pages as images
+        try {
+            iframe.style.display = 'none';
+            pdfPagesContainer.style.display = 'block';
+            pdfPagesContainer.innerHTML = ''; // Clear previous pages
+
+            // Load PDF
+            const loadingTask = pdfjsLib.getDocument(url);
+            const pdf = await loadingTask.promise;
+
+            // Hide loading overlay
+            if (overlay) overlay.style.display = 'none';
+
+            // Render all pages
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+
+                // Create canvas for this page
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-page-canvas';
+                const context = canvas.getContext('2d');
+
+                // Calculate scale to fit mobile screen
+                const viewport = page.getViewport({ scale: 1 });
+                const scale = (window.innerWidth - 32) / viewport.width; // 32px for padding
+                const scaledViewport = page.getViewport({ scale: scale });
+
+                canvas.width = scaledViewport.width;
+                canvas.height = scaledViewport.height;
+
+                // Render page
+                await page.render({
+                    canvasContext: context,
+                    viewport: scaledViewport
+                }).promise;
+
+                // Add page number
+                const pageWrapper = document.createElement('div');
+                pageWrapper.className = 'pdf-page-wrapper';
+                pageWrapper.appendChild(canvas);
+
+                if (pdf.numPages > 1) {
+                    const pageLabel = document.createElement('div');
+                    pageLabel.className = 'pdf-page-label';
+                    pageLabel.textContent = `Page ${pageNum} / ${pdf.numPages}`;
+                    pageWrapper.appendChild(pageLabel);
+                }
+
+                pdfPagesContainer.appendChild(pageWrapper);
+            }
+
+        } catch (error) {
+            console.error('Error loading PDF with PDF.js:', error);
+            // Fallback to iframe
+            iframe.style.display = 'block';
+            pdfPagesContainer.style.display = 'none';
+            iframe.src = url;
+            if (overlay) overlay.style.display = 'none';
         }
-        iframe.style.display = 'none';
     } else {
         // Desktop: Use iframe
+        pdfPagesContainer.style.display = 'none';
         iframe.style.display = 'block';
         iframe.src = url;
 
@@ -207,12 +250,12 @@ window.openPartitionModal = (url, voix) => {
 window.closePartitionModal = () => {
     const modal = document.getElementById('partitionModal');
     const iframe = document.getElementById('pdfViewer');
+    const pdfPagesContainer = document.getElementById('pdfPagesContainer');
 
-    if (!modal || !iframe) return;
-
-    modal.style.display = 'none';
-    iframe.src = ''; // Clear iframe to stop loading
-    document.body.style.overflow = 'auto';
+    if (modal) modal.style.display = 'none';
+    if (iframe) iframe.src = '';
+    if (pdfPagesContainer) pdfPagesContainer.innerHTML = '';
+    document.body.style.overflow = '';
 };
 
 // Global Close modal handler (Close on click outside)

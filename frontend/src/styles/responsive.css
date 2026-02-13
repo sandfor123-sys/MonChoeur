@@ -135,14 +135,43 @@
     .pdf-viewer-container {
         flex: 1;
         display: flex;
-        align-items: center;
-        justify-content: center;
+        flex-direction: column;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
     }
 
     .pdf-loading-overlay {
         position: relative !important;
         width: 100%;
         height: 100%;
+    }
+
+    /* PDF.js Mobile Rendering */
+    #pdfPagesContainer {
+        width: 100%;
+        padding: var(--spacing-sm);
+    }
+
+    .pdf-page-wrapper {
+        margin-bottom: var(--spacing-lg);
+        background: white;
+        box-shadow: var(--shadow-md);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    .pdf-page-canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .pdf-page-label {
+        text-align: center;
+        padding: var(--spacing-sm);
+        background: var(--color-gray-light);
+        font-size: 0.85rem;
+        color: var(--color-gray);
     }
 }
 
