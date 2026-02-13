@@ -5,60 +5,60 @@
 /* Grids */
 @media (max-width: 768px) {
     .chants-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        padding: 0 var(--spacing-sm);
     }
 
-    .detail-content-grid {
-        grid-template-columns: 1fr;
+    .chant-card {
+        width: 100% !important;
+        margin-bottom: var(--spacing-md);
     }
 
     .admin-stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr !important;
     }
 }
 
 /* Navbar & Mobile Menu */
 @media (max-width: 768px) {
+    .nav-toggle {
+        display: flex !important;
+    }
+
     .nav-menu {
         position: fixed;
-        top: 70px;
+        top: 60px;
+        /* Reduced from 70px */
         right: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
+        width: 100% !important;
+        height: calc(100vh - 60px);
         background: var(--color-white);
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: var(--spacing-xl);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-lg);
+        justify-content: flex-start;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-2xl) var(--spacing-xl);
+        box-shadow: none;
+        /* Cleaner for full screen */
         transition: 0.3s ease-in-out;
-        z-index: 999;
+        z-index: 10000;
+        /* Above everything */
+        overflow-y: auto;
     }
 
     .nav-menu.active {
         right: 0;
     }
 
-    .nav-actions {
-        display: none;
-    }
-
     .nav-link {
-        font-size: 1.25rem;
-    }
-
-    /* Hamburger Menu Animation */
-    .nav-toggle.active span:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
-    }
-
-    .nav-toggle.active span:nth-child(2) {
-        opacity: 0;
-    }
-
-    .nav-toggle.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(7px, -6px);
+        font-size: 1.5rem !important;
+        width: 100%;
+        text-align: center;
+        padding: var(--spacing-md);
     }
 }
 

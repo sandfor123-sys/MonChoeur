@@ -56,6 +56,7 @@ async function playChant(chantId) {
 
 // View chant details
 function viewChant(chantId) {
+  console.log('Viewing chant:', chantId);
   router.navigate(`#chant/${chantId}`);
 }
 

@@ -20,7 +20,9 @@
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    /* UX Improvement */
+    position: relative;
+    /* For ensuring onclick works well */
+    user-select: none;
 }
 
 .chant-card:hover {
