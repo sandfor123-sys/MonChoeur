@@ -132,7 +132,9 @@ const api = {
         update: (id, data) => api.put(`/chants/${id}`, data),
         delete: (id) => api.delete(`/chants/${id}`),
         uploadWithProgress: (data, onProgress) => api.upload('/chants', data, onProgress, 'POST'),
-        updateWithProgress: (id, data, onProgress) => api.upload(`/chants/${id}`, data, onProgress, 'PUT')
+        updateWithProgress: (id, data, onProgress) => api.upload(`/chants/${id}`, data, onProgress, 'PUT'),
+        deleteAudio: (chantId, audioId) => api.delete(`/chants/${chantId}/audio/${audioId}`),
+        deletePartition: (chantId, partitionId) => api.delete(`/chants/${chantId}/partition/${partitionId}`)
     },
 
     // Playlists endpoints

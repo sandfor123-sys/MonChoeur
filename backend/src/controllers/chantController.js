@@ -110,39 +110,42 @@ exports.updateChant = async (req, res) => {
             const currentChant = await Chant.findById(chantId);
             const voiceFields = ['audio_complet', 'audio_soprano', 'audio_alto', 'audio_tenor', 'audio_basse'];
 
-            let hasNewAudio = false;
+            // 1. Handle Audio Updates (Targeted Replacement)
             for (const field of voiceFields) {
-                if (req.files[field]) hasNewAudio = true;
-            }
+                if (req.files[field]) {
+                    const voice = field === 'audio_complet' ? 'toutes' : field.split('_')[1];
+                    const type = field === 'audio_complet' ? 'complet' : 'voix_separee';
 
-            if (hasNewAudio) {
-                // Delete existing audio files before replacing
-                if (currentChant.audio && currentChant.audio.length > 0) {
-                    await deleteFilesFromCloudinary(currentChant.audio, 'video');
-                    await Chant.deleteAllAudio(chantId);
-                }
+                    // Find existing audio for this specific voice/type
+                    const existingAudio = (currentChant.audio || []).find(a =>
+                        a.type === type && a.voix === voice
+                    );
 
-                for (const field of voiceFields) {
-                    if (req.files[field]) {
-                        const voice = field === 'audio_complet' ? 'toutes' : field.split('_')[1];
-                        const type = field === 'audio_complet' ? 'complet' : 'voix_separee';
-
-                        await Chant.addAudio(chantId, {
-                            url: req.files[field][0].path,
-                            nom: req.files[field][0].originalname,
-                            type: type,
-                            voix: voice
-                        });
+                    // If exists, delete old file
+                    if (existingAudio) {
+                        try {
+                            const publicId = getPublicIdFromUrl(existingAudio.fichier_url);
+                            if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+                            await Chant.deleteAudio(existingAudio.id);
+                        } catch (err) {
+                            console.error(`Failed to delete old audio for ${field}:`, err);
+                        }
                     }
+
+                    // Add new file
+                    await Chant.addAudio(chantId, {
+                        url: req.files[field][0].path,
+                        nom: req.files[field][0].originalname,
+                        type: type,
+                        voix: voice
+                    });
                 }
             }
 
+            // 2. Handle Partition Updates (Append Only - Non-destructive)
             if (req.files.partition) {
-                if (currentChant.partitions && currentChant.partitions.length > 0) {
-                    await deleteFilesFromCloudinary(currentChant.partitions, 'raw');
-                    await Chant.deleteAllPartitions(chantId);
-                }
-
+                // We append new partitions without deleting old ones
+                // To delete partitions, the user should use the delete action in UI (to be implemented if needed)
                 for (const partitionFile of req.files.partition) {
                     await Chant.addPartition(chantId, {
                         url: partitionFile.path,
@@ -190,5 +193,49 @@ exports.deleteChant = async (req, res) => {
     } catch (error) {
         console.error('Delete chant error:', error);
         res.status(500).json({ error: 'Erreur lors de la suppression du chant' });
+    }
+};
+
+exports.deleteAudio = async (req, res) => {
+    try {
+        const { id, audioId } = req.params;
+        const chant = await Chant.findById(id);
+        if (!chant) return res.status(404).json({ error: 'Chant non trouvé' });
+
+        const audioFile = (chant.audio || []).find(a => a.id == audioId);
+        if (!audioFile) return res.status(404).json({ error: 'Fichier audio non trouvé' });
+
+        const publicId = getPublicIdFromUrl(audioFile.fichier_url);
+        if (publicId) {
+            await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+        }
+
+        await Chant.deleteAudio(audioId);
+        res.json({ message: 'Fichier audio supprimé' });
+    } catch (error) {
+        console.error('Delete audio error:', error);
+        res.status(500).json({ error: 'Erreur lors de la suppression de l\'audio' });
+    }
+};
+
+exports.deletePartition = async (req, res) => {
+    try {
+        const { id, partitionId } = req.params;
+        const chant = await Chant.findById(id);
+        if (!chant) return res.status(404).json({ error: 'Chant non trouvé' });
+
+        const partitionFile = (chant.partitions || []).find(p => p.id == partitionId);
+        if (!partitionFile) return res.status(404).json({ error: 'Partition non trouvée' });
+
+        const publicId = getPublicIdFromUrl(partitionFile.fichier_url);
+        if (publicId) {
+            await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+        }
+
+        await Chant.deletePartition(partitionId);
+        res.json({ message: 'Partition supprimée' });
+    } catch (error) {
+        console.error('Delete partition error:', error);
+        res.status(500).json({ error: 'Erreur lors de la suppression de la partition' });
     }
 };

@@ -16,11 +16,11 @@ function createChantCard(chant) {
         <p class="chant-description-v2">${chant.description ? chant.description.substring(0, 80) + '...' : 'Aucune description disponible.'}</p>
         
         <div class="chant-voices-v2">
-          <div class="voice-indicator ${chant.audio_soprano ? 'active' : ''}">S</div>
-          <div class="voice-indicator ${chant.audio_alto ? 'active' : ''}">A</div>
-          <div class="voice-indicator ${chant.audio_tenor ? 'active' : ''}">T</div>
-          <div class="voice-indicator ${chant.audio_basse ? 'active' : ''}">B</div>
-          ${chant.partition ? `<div class="voice-indicator active pdf" title="Partition"><i class="fas fa-file-pdf"></i></div>` : ''}
+          <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'soprano') ? 'active' : ''}">S</div>
+          <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'alto') ? 'active' : ''}">A</div>
+          <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'tenor') ? 'active' : ''}">T</div>
+          <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'basse') ? 'active' : ''}">B</div>
+          ${(chant.partitions && chant.partitions.length > 0) ? `<div class="voice-indicator active pdf" title="Partition"><i class="fas fa-file-pdf"></i></div>` : ''}
         </div>
       </div>
       

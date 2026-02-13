@@ -265,7 +265,16 @@ async function loadAdminChants(search = '', category = 'all') {
     const statMissing = document.getElementById('statMissingChants');
 
     if (statTotal) statTotal.textContent = chants.length;
-    let completeCount = chants.filter(c => c.audio_count >= 4).length;
+    // Calculate complete counts based on voice presence
+    let completeCount = chants.filter(c => {
+      if (!c.audio) return false;
+      const voices = new Set(c.audio.map(a => a.type === 'complet' ? 'complet' : a.voix));
+      // Check if we have S, A, T, B (or just 'complet' which usually implies all, or specifically 4 separate voices + complet?)
+      // Let's assume complete means having all 4 voices OR a complete track.
+      // Actually user request implies SATB complete.
+      return voices.has('soprano') && voices.has('alto') && voices.has('tenor') && voices.has('basse');
+    }).length;
+
     if (statComplete) statComplete.textContent = completeCount;
     if (statMissing) statMissing.textContent = chants.length - completeCount;
 
@@ -308,10 +317,13 @@ async function loadAdminChants(search = '', category = 'all') {
               <td class="admin-actions">
                 <button class="btn btn-sm btn-outline" onclick="editChant(${chant.id})">
                   <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="confirmDeleteChant(${chant.id}, '${chant.titre.replace(/'/g, "\\'")}')">
-                  <i class="fas fa-trash"></i>
-                </button>
+                  </button>
+                  <button class="btn-icon" onclick="downloadAllAssets(${chant.id})" title="Tout télécharger">
+                    <i class="fas fa-download"></i>
+                  </button>
+                  <button class="btn-icon delete" onclick="deleteChant(${chant.id}, '${chant.titre.replace(/'/g, "\\'")}')" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
               </td>
             </tr>
           `).join('')}
@@ -337,6 +349,10 @@ async function showChantModal(chantId = null) {
     zone.classList.remove('has-file');
     const badge = zone.querySelector('.file-present-badge');
     if (badge) badge.remove();
+    const deleteBtn = zone.querySelector('.delete-file-btn');
+    if (deleteBtn) deleteBtn.remove();
+    const input = zone.querySelector('input');
+    if (input) input.disabled = false;
     // Restore default text if it was modified
     const p = zone.querySelector('p');
     if (p) {
@@ -367,23 +383,38 @@ async function showChantModal(chantId = null) {
       // Visual feedback for existing files
       const voiceTypes = ['complet', 'soprano', 'alto', 'tenor', 'basse'];
       voiceTypes.forEach(type => {
-        let hasFile = false;
-        if (type === 'complet') {
-          hasFile = (chant.audio || []).some(a => a.type === 'complet');
-        } else {
-          hasFile = (chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === type);
-        }
+        const audioFile = type === 'complet'
+          ? (chant.audio || []).find(a => a.type === 'complet')
+          : (chant.audio || []).find(a => a.type === 'voix_separee' && a.voix === type);
 
         const zone = document.getElementById(`drop-audio_${type}`);
-        if (zone && hasFile) {
+        if (zone && audioFile) {
           zone.classList.add('has-file');
           const p = zone.querySelector('p');
           if (p) {
-            p.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${type === 'complet' ? 'Audio Complet' : type.charAt(0).toUpperCase()} (Présent)`;
+            p.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${audioFile.fichier_nom}`;
+
+            // Container for badges
+            const badgeContainer = document.createElement('div');
+            badgeContainer.className = 'd-flex justify-between align-center mt-2 w-100';
+
             const badge = document.createElement('div');
             badge.className = 'file-present-badge';
             badge.innerHTML = '<i class="fas fa-cloud"></i> Sur le serveur';
-            zone.appendChild(badge);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-sm btn-danger delete-file-btn';
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.type = 'button';
+            deleteBtn.onclick = (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              deleteAudioFile(chant.id, audioFile.id, type);
+            };
+
+            badgeContainer.appendChild(badge);
+            badgeContainer.appendChild(deleteBtn);
+            zone.appendChild(badgeContainer);
           }
         }
       });
@@ -394,11 +425,25 @@ async function showChantModal(chantId = null) {
         if (partZone) {
           partZone.classList.add('has-file');
           const p = partZone.querySelector('p');
-          if (p) p.innerHTML = '<i class="fas fa-file-pdf text-success"></i> Partition (Présente)';
-          const badge = document.createElement('div');
-          badge.className = 'file-present-badge';
-          badge.innerHTML = '<i class="fas fa-cloud"></i> Sur le serveur';
-          partZone.appendChild(badge);
+          if (p) p.innerHTML = '<i class="fas fa-file-pdf text-success"></i> Partitions présentes: ' + chant.partitions.length;
+
+          // List partitions
+          const listProp = document.createElement('div');
+          listProp.className = 'partition-list mt-2 text-left';
+
+          chant.partitions.forEach(part => {
+            const item = document.createElement('div');
+            item.className = 'd-flex justify-between align-center p-1 bg-light rounded mb-1';
+            item.innerHTML = `
+                <span class="text-sm text-truncate" style="max-width: 150px;">${part.fichier_nom}</span>
+                <button type="button" class="btn btn-xs btn-danger" onclick="deletePartitionFile(${chant.id}, ${part.id}, event)">
+                    <i class="fas fa-trash"></i>
+                </button>
+              `;
+            listProp.appendChild(item);
+          });
+
+          partZone.appendChild(listProp);
         }
       }
 
@@ -445,21 +490,35 @@ async function handleChantSubmit(e) {
   formData.append('paroles', document.getElementById('paroles').value);
   formData.append('description', document.getElementById('description').value);
 
-  // Audio files
-  const voiceFields = ['audio_complet', 'audio_soprano', 'audio_alto', 'audio_tenor', 'audio_basse'];
-  voiceFields.forEach(field => {
-    const input = document.getElementById(field);
-    if (input && input.files[0]) {
-      formData.append(field, input.files[0]);
-    }
-  });
+  // 2. Validate files
+  const voiceTypes = ['complet', 'soprano', 'alto', 'tenor', 'basse'];
 
-  // Partition
-  const partitionInput = document.getElementById('partition');
-  if (partitionInput && partitionInput.files[0]) {
-    formData.append('partition', partitionInput.files[0]);
+  // Audio validation
+  for (const type of voiceTypes) {
+    const fileInput = document.getElementById(`audio_${type}`);
+    if (fileInput && fileInput.files[0]) {
+      const file = fileInput.files[0];
+      const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-m4a', 'audio/aac'];
+      if (!validTypes.includes(file.type)) {
+        toast.error(`Le fichier pour ${type} doit être un audio (MP3, WAV, OGG, AAC).`);
+        return;
+      }
+      formData.append(`audio_${type}`, file);
+    }
   }
 
+  // Partition validation
+  const partitionInput = document.getElementById('partition');
+  if (partitionInput && partitionInput.files.length > 0) {
+    for (let i = 0; i < partitionInput.files.length; i++) {
+      const file = partitionInput.files[i];
+      if (file.type !== 'application/pdf') {
+        toast.error('Les partitions doivent être au format PDF.');
+        return;
+      }
+      formData.append('partition', file);
+    }
+  }
   const chantId = document.getElementById('chantId').value;
   const btnSave = document.getElementById('btnSaveChant');
   const progressContainer = document.getElementById('uploadProgress');
@@ -493,7 +552,7 @@ async function handleChantSubmit(e) {
   }
 }
 
-async function confirmDeleteChant(id, name) {
+async function deleteChant(id, name) {
   if (confirm(`Êtes-vous sûr de vouloir supprimer "${name}" ? Cette action est irréversible et supprimera également les fichiers associés sur le cloud.`)) {
     try {
       await api.chants.delete(id);
@@ -554,7 +613,85 @@ function handleFileSelect(input, previewId) {
 
 // Global scope for onclicks
 window.editChant = showChantModal;
-window.confirmDeleteChant = confirmDeleteChant;
+window.deleteChant = deleteChant;
+window.downloadAllAssets = async (chantId) => {
+  try {
+    const chant = allChants.find(c => c.id === chantId);
+    if (!chant) return;
+
+    let filesToDownload = [];
+
+    if (chant.audio) {
+      chant.audio.forEach(a => {
+        // Force download by adding fl_attachment if it's a Cloudinary URL
+        let url = a.fichier_url;
+        if (url.includes('cloudinary.com') && !url.includes('fl_attachment')) {
+          url = url.replace('/upload/', '/upload/fl_attachment/');
+        }
+        filesToDownload.push({ url: url, name: a.fichier_nom });
+      });
+    }
+    if (chant.partitions) {
+      chant.partitions.forEach(p => {
+        let url = p.fichier_url;
+        if (url.includes('cloudinary.com') && !url.includes('fl_attachment')) {
+          url = url.replace('/upload/', '/upload/fl_attachment/');
+        }
+        filesToDownload.push({ url: url, name: p.fichier_nom });
+      });
+    }
+
+    if (filesToDownload.length === 0) {
+      toast.info("Aucun fichier à télécharger pour ce chant.");
+      return;
+    }
+
+    toast.info(`Téléchargement de ${filesToDownload.length} fichiers...`);
+
+    filesToDownload.forEach((file, index) => {
+      setTimeout(() => {
+        // Create an iframe to trigger download silently, or just open in new tab
+        // Opening in new tab is safer for CORS/Cloudinary
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.target = '_blank';
+        // download attribute often ignored for cross-origin, but fl_attachment handles it
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, index * 800);
+    });
+
+  } catch (error) {
+    toast.error("Erreur lors du téléchargement : " + error.message);
+  }
+};
+
+window.deleteAudioFile = async (chantId, audioId, type) => {
+  if (!confirm('Supprimer ce fichier audio ?')) return;
+  try {
+    await api.chants.deleteAudio(chantId, audioId);
+    toast.success('Fichier supprimé');
+    showChantModal(chantId); // Reload modal
+  } catch (error) {
+    toast.error('Erreur: ' + error.message);
+  }
+};
+
+window.deletePartitionFile = async (chantId, partitionId, event) => {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  if (!confirm('Supprimer cette partition ?')) return;
+  try {
+    await api.chants.deletePartition(chantId, partitionId);
+    toast.success('Partition supprimée');
+    showChantModal(chantId); // Reload modal
+  } catch (error) {
+    toast.error('Erreur: ' + error.message);
+  }
+};
 window.handleFileSelect = handleFileSelect;
 
 // Register route

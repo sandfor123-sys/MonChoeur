@@ -194,6 +194,14 @@ async function renderPlaylistDetail(playlistId) {
                     <div class="chant-meta font-sm">
                       <span>Ajouté le ${new Date(chant.added_at).toLocaleDateString('fr-FR')}</span>
                     </div>
+                    
+                     <div class="chant-voices-v2 mt-2">
+                      <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'soprano') ? 'active' : ''}" style="width: 20px; height: 20px; font-size: 0.6rem;">S</div>
+                      <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'alto') ? 'active' : ''}" style="width: 20px; height: 20px; font-size: 0.6rem;">A</div>
+                      <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'tenor') ? 'active' : ''}" style="width: 20px; height: 20px; font-size: 0.6rem;">T</div>
+                      <div class="voice-indicator ${(chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === 'basse') ? 'active' : ''}" style="width: 20px; height: 20px; font-size: 0.6rem;">B</div>
+                      ${(chant.partitions && chant.partitions.length > 0) ? `<div class="voice-indicator active pdf" title="Partition" style="width: 20px; height: 20px; font-size: 0.6rem;"><i class="fas fa-file-pdf"></i></div>` : ''}
+                    </div>
                   </div>
                   <div class="chant-card-footer">
                     <button class="btn btn-sm btn-primary" onclick="playChant(${chant.id})">
@@ -212,9 +220,12 @@ async function renderPlaylistDetail(playlistId) {
       }
           </div>
           
-          <div class="playlist-footer-actions mt-4 text-center">
+          <div class="playlist-footer-actions mt-4 text-center d-flex justify-center gap-sm">
             <button class="btn btn-glass" onclick="sharePlaylist(${playlist.id})">
-              <i class="fas fa-share-alt"></i> Partager la feuille de chant
+              <i class="fas fa-file-alt"></i> Voir / Copier Texte
+            </button>
+            <button class="btn btn-primary" onclick="exportPlaylistToPDF(${playlist.id})">
+              <i class="fas fa-file-pdf"></i> Exporter PDF
             </button>
           </div>
         </div>
@@ -498,6 +509,78 @@ function copyShareText() {
   toast.success('Texte copié dans le presse-papier !');
 }
 
+// Export to PDF
+async function exportPlaylistToPDF(id) {
+  try {
+    const playlist = await api.playlists.getById(id);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Font setup
+    doc.setFont("helvetica");
+
+    // Title
+    doc.setFontSize(20);
+    doc.text(playlist.nom.toUpperCase(), 105, 20, { align: "center" });
+
+    // Meta
+    doc.setFontSize(10);
+    doc.text(`Généré le ${new Date().toLocaleDateString()}`, 105, 30, { align: "center" });
+    if (playlist.description) {
+      doc.text(playlist.description, 105, 35, { align: "center" });
+    }
+
+    let yPos = 50;
+    const order = ['entree', 'kyrie', 'gloria', 'psaume', 'alleluia', 'sanctus', 'agnus', 'communion', 'envoi', 'autre'];
+
+    if (playlist.chants && playlist.chants.length > 0) {
+      const sortedChants = [...playlist.chants].sort((a, b) => {
+        return order.indexOf(a.categorie) - order.indexOf(b.categorie);
+      });
+
+      sortedChants.forEach((chant, index) => {
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        // Category & Title
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${index + 1}. [${chant.categorie.toUpperCase()}] ${chant.titre}`, 20, yPos);
+        yPos += 7;
+
+        // Composer
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.text(`Auteur/Compositeur : ${chant.compositeur || 'Anonyme'}`, 25, yPos);
+        yPos += 10;
+
+        // Lyrics preview (first couple of lines or chorus)
+        if (chant.paroles) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          const lines = doc.splitTextToSize(chant.paroles.substring(0, 300) + "...", 170);
+          doc.text(lines, 25, yPos);
+          yPos += (lines.length * 5) + 10;
+        } else {
+          yPos += 5;
+        }
+      });
+    } else {
+      doc.text("Aucun chant dans cette liste.", 20, yPos);
+    }
+
+    // Save
+    doc.save(`Feuille_Chant_${playlist.nom.replace(/\s+/g, '_')}.pdf`);
+    toast.success('PDF téléchargé !');
+
+  } catch (error) {
+    console.error('PDF Export Error:', error);
+    toast.error('Erreur lors de l\'export PDF: ' + error.message);
+  }
+}
+
 // Global scope
 window.viewPlaylist = (id) => router.navigate('#playlist/' + id);
 window.viewChant = (id) => router.navigate('#chant/' + id);
@@ -507,6 +590,7 @@ window.playChant = async (id) => {
 };
 window.sharePlaylist = sharePlaylist;
 window.copyShareText = copyShareText;
+window.exportPlaylistToPDF = exportPlaylistToPDF;
 window.saveAsPlaylist = saveAsPlaylist;
 window.toggleSmartPlaylist = toggleSmartPlaylist;
 
@@ -516,3 +600,7 @@ if (!window.closeModal) {
     document.getElementById(id).style.display = 'none';
   };
 }
+
+// Register routes
+router.register('playlists', renderPlaylists);
+router.register('playlist', renderPlaylistDetail);

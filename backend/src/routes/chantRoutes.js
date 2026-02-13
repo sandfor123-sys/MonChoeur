@@ -26,5 +26,7 @@ router.put('/:id', protect, admin, upload.fields([
     { name: 'partition', maxCount: 5 }
 ]), updateChant);
 router.delete('/:id', protect, admin, deleteChant);
+router.delete('/:id/audio/:audioId', protect, admin, require('../controllers/chantController').deleteAudio);
+router.delete('/:id/partition/:partitionId', protect, admin, require('../controllers/chantController').deletePartition);
 
 module.exports = router;
