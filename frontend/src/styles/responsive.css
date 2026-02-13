@@ -6,7 +6,7 @@
 @media (max-width: 768px) {
     .chants-grid {
         grid-template-columns: 1fr !important;
-        padding: 0 var(--spacing-sm);
+        padding: 0;
     }
 
     .chant-card {
@@ -20,6 +20,56 @@
 
     .form-grid {
         grid-template-columns: 1fr !important;
+    }
+
+    /* Catalogue Page Specific */
+    .page-header {
+        text-align: center;
+        margin-bottom: var(--spacing-lg) !important;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem !important;
+    }
+
+    .page-header p {
+        font-size: 0.9rem !important;
+    }
+
+    .catalogue-controls {
+        flex-direction: column !important;
+        padding: var(--spacing-md) !important;
+        gap: var(--spacing-md) !important;
+    }
+
+    .catalogue-search-bar {
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .catalogue-search-bar input {
+        font-size: 0.9rem !important;
+        padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) 2.5rem !important;
+    }
+
+    .catalogue-filters-v2 {
+        width: 100%;
+        flex-direction: column !important;
+        gap: var(--spacing-sm) !important;
+    }
+
+    .filter-item {
+        width: 100% !important;
+    }
+
+    .filter-item select {
+        width: 100% !important;
+        font-size: 0.85rem !important;
+    }
+
+    .btn-icon-only {
+        width: 100% !important;
+        padding: var(--spacing-sm) !important;
     }
 }
 
