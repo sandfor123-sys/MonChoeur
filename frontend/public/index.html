@@ -3,16 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MonChoeur - Plateforme d'apprentissage de chants choraux pour la messe">
-    <meta name="keywords" content="chant, choral, liturgie, messe, musique, église">
-    <meta name="author" content="MonChoeur Team">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="MonChœur - Plateforme de gestion de chants liturgiques">
+    <meta name="theme-color" content="#4A90E2">
 
-    <title>MonChoeur - Chants pour la Messe</title>
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
 
-    <!-- Favicon -->
-    <link rel="icon" href="/favicon.webp" type="image/webp">
-    <link rel="shortcut icon" href="/favicon.webp" type="image/webp">
+    <title>MonChœur - Gestion de Chants Liturgiques</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +29,7 @@
     <link rel="stylesheet" href="/src/styles/main.css">
     <link rel="stylesheet" href="/src/styles/components.css">
     <link rel="stylesheet" href="/src/styles/responsive.css">
+    <link rel="stylesheet" href="/src/styles/mobile-app.css">
 
     <!-- PDF.js Library for Mobile PDF Rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -43,30 +45,65 @@
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="container">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
             <a href="#accueil" class="nav-brand">
                 <i class="fas fa-music"></i>
                 <span>MonChœur</span>
             </a>
+            <div class="nav-actions">
+                <!-- Placeholder for future actions -->
+            </div>
 
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+            <!-- Desktop Menu (hidden on mobile) -->
+            <button class="nav-toggle" id="nav-toggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="#accueil" class="nav-link active">Accueil</a></li>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#accueil" class="nav-link">Accueil</a></li>
                 <li><a href="#catalogue" class="nav-link">Catalogue</a></li>
-                <li><a href="#playlists" class="nav-link">Mes Playlists</a></li>
+                <li><a href="#playlists" class="nav-link">Playlists</a></li>
+                <li><a href="#profil" class="nav-link" id="nav-profil">Profil</a></li>
                 <li><a href="#apropos" class="nav-link">À Propos</a></li>
             </ul>
-
-            <div class="nav-actions">
-                <button class="btn btn-outline" id="btnLogin">Connexion</button>
-                <button class="btn btn-primary" id="btnRegister">S'inscrire</button>
-            </div>
         </div>
     </nav>
+
+    <!-- Mobile Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="mobile-sidebar" id="mobileSidebar">
+        <div class="sidebar-header">
+            <h2>MonChœur</h2>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#accueil" class="sidebar-nav-item" data-page="accueil">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="#catalogue" class="sidebar-nav-item" data-page="catalogue">
+                <i class="fas fa-book"></i>
+                <span>Catalogue</span>
+            </a>
+            <a href="#playlists" class="sidebar-nav-item" data-page="playlists">
+                <i class="fas fa-music"></i>
+                <span>Playlists</span>
+            </a>
+            <a href="#profil" class="sidebar-nav-item" data-page="profil">
+                <i class="fas fa-user-circle"></i>
+                <span>Profil</span>
+            </a>
+            <a href="#apropos" class="sidebar-nav-item" data-page="apropos">
+                <i class="fas fa-info-circle"></i>
+                <span>À Propos</span>
+            </a>
+        </nav>
+    </aside>
 
     <!-- Main Content -->
     <main id="app">
@@ -164,6 +201,7 @@
     <script src="/src/utils/auth.js"></script>
     <script src="/src/utils/toast.js"></script>
     <script src="/src/utils/router.js"></script>
+    <script src="/src/utils/mobile-sidebar.js"></script>
     <script src="/src/components/AudioPlayer.js"></script>
     <script src="/src/components/ChantCard.js"></script>
     <script src="/src/pages/Accueil.js"></script>

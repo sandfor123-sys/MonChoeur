@@ -186,21 +186,23 @@ window.openPartitionModal = async (url, voix) => {
                 canvas.className = 'pdf-page-canvas';
                 const context = canvas.getContext('2d');
 
-                // Calculate scale to fit mobile screen
-                const viewport = page.getViewport({ scale: 1 });
-                const scale = (window.innerWidth - 32) / viewport.width; // 32px for padding
+                // Calculate scale to fit mobile screen width
+                const viewport = page.getViewport({ scale: 1.0 });
+                const containerWidth = pdfPagesContainer.offsetWidth || window.innerWidth - 32;
+                const scale = containerWidth / viewport.width;
                 const scaledViewport = page.getViewport({ scale: scale });
 
+                // Set canvas dimensions
                 canvas.width = scaledViewport.width;
                 canvas.height = scaledViewport.height;
 
-                // Render page
+                // Render page with proper viewport
                 await page.render({
                     canvasContext: context,
                     viewport: scaledViewport
                 }).promise;
 
-                // Add page number
+                // Add page wrapper
                 const pageWrapper = document.createElement('div');
                 pageWrapper.className = 'pdf-page-wrapper';
                 pageWrapper.appendChild(canvas);
