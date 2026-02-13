@@ -1,7 +1,7 @@
 // ChantCard Component
 function createChantCard(chant) {
   return `
-    <div class="chant-card glass glow-hover" data-id="${chant.id}">
+    <div class="chant-card glass glow-hover" data-id="${chant.id}" onclick="viewChant(${chant.id})">
       <div class="chant-card-header">
         <span class="chant-category-pill">${chant.categorie}</span>
         <h3 class="chant-title">${chant.titre}</h3>
@@ -25,13 +25,13 @@ function createChantCard(chant) {
       </div>
       
       <div class="chant-card-footer-v2">
-        <button class="btn btn-primary btn-sm" onclick="playChant(${chant.id})">
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); playChant(${chant.id})">
           <i class="fas fa-play"></i> Écouter
         </button>
-        <button class="btn btn-ghost btn-sm" onclick="viewChant(${chant.id})" title="Détails">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); viewChant(${chant.id})" title="Détails">
           <i class="fas fa-info-circle"></i>
         </button>
-        <button class="btn btn-ghost btn-sm" onclick="addToPlaylist(${chant.id})" title="Playlists">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); addToPlaylist(${chant.id})" title="Playlists">
           <i class="fas fa-plus"></i>
         </button>
       </div>
