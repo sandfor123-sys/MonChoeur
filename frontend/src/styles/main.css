@@ -279,53 +279,15 @@ img {
 }
 
 .nav-toggle {
-  display: flex;
+  display: none;
+  /* Hidden on desktop */
   flex-direction: column;
   gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--spacing-sm);
-  z-index: 1001;
-}
-
-@media (min-width: 769px) {
-  .nav-toggle {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .nav-menu {
-    position: fixed;
-    top: 70px;
-    right: -100%;
-    width: 250px;
-    height: calc(100vh - 70px);
-    background: var(--color-white);
-    flex-direction: column;
-    padding: var(--spacing-xl);
-    box-shadow: var(--shadow-lg);
-    transition: 0.3s ease-in-out;
-  }
-
-  .nav-menu.active {
-    right: 0;
-  }
-
-  .nav-actions {
-    display: none;
-    /* Hide login/admin buttons in separate line, better to put in menu */
-  }
-}
-
-.nav-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
+  z-index: 10001;
 }
 
 .nav-toggle span {
@@ -334,6 +296,48 @@ img {
   background: var(--color-dark);
   border-radius: var(--radius-full);
   transition: all var(--transition-fast);
+}
+
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: flex !important;
+    /* Force show on mobile */
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background: var(--color-white);
+    flex-direction: column;
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-lg);
+    transition: right 0.3s ease-in-out;
+    z-index: 10000;
+  }
+
+  .nav-menu.active {
+    right: 0;
+  }
+
+  .nav-actions {
+    display: none;
+  }
+
+  /* Hamburger Animation */
+  .nav-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .nav-toggle.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+  }
 }
 
 /* ===================================

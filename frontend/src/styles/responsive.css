@@ -113,16 +113,36 @@
 }
 
 /* Modals on Mobile */
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .modal-content {
         padding: var(--spacing-md);
         max-height: 100vh;
         height: 100%;
         border-radius: 0;
+        width: 100% !important;
     }
 
     .modal-xl {
         height: 100vh;
+        width: 100% !important;
+    }
+
+    .modal-content-flex {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pdf-viewer-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pdf-loading-overlay {
+        position: relative !important;
+        width: 100%;
+        height: 100%;
     }
 }
 

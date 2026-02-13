@@ -159,13 +159,38 @@ window.openPartitionModal = (url, voix) => {
     const overlay = document.getElementById('pdfLoadingOverlay');
     if (overlay) overlay.style.display = 'flex';
 
-    // Direct embed for speed
-    iframe.src = url;
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
-    // Hide overlay when iframe loads
-    iframe.onload = () => {
-        if (overlay) overlay.style.display = 'none';
-    };
+    if (isMobile) {
+        // On mobile: Show a direct download/open button instead of iframe
+        if (overlay) {
+            overlay.innerHTML = `
+                <div style="text-align: center; padding: var(--spacing-xl);">
+                    <i class="fas fa-file-pdf" style="font-size: 4rem; color: var(--color-primary); margin-bottom: var(--spacing-md);"></i>
+                    <h3 style="margin-bottom: var(--spacing-md);">Partition - ${voix}</h3>
+                    <p style="margin-bottom: var(--spacing-lg); color: var(--color-gray);">
+                        Cliquez sur le bouton ci-dessous pour ouvrir la partition dans votre lecteur PDF.
+                    </p>
+                    <a href="${url}" target="_blank" class="btn btn-primary btn-lg" style="text-decoration: none;">
+                        <i class="fas fa-external-link-alt"></i> Ouvrir la Partition
+                    </a>
+                </div>
+            `;
+            overlay.style.display = 'flex';
+            overlay.style.backgroundColor = 'white';
+        }
+        iframe.style.display = 'none';
+    } else {
+        // Desktop: Use iframe
+        iframe.style.display = 'block';
+        iframe.src = url;
+
+        // Hide overlay when iframe loads
+        iframe.onload = () => {
+            if (overlay) overlay.style.display = 'none';
+        };
+    }
 
     if (playBtn) {
         playBtn.style.display = 'inline-block';
