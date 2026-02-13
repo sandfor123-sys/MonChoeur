@@ -318,9 +318,6 @@ async function loadAdminChants(search = '', category = 'all') {
                 <button class="btn btn-sm btn-outline" onclick="editChant(${chant.id})">
                   <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn-icon" onclick="downloadAllAssets(${chant.id})" title="Tout télécharger">
-                    <i class="fas fa-download"></i>
-                  </button>
                   <button class="btn-icon delete" onclick="deleteChant(${chant.id}, '${chant.titre.replace(/'/g, "\\'")}')" title="Supprimer">
                     <i class="fas fa-trash"></i>
                   </button>
@@ -393,28 +390,35 @@ async function showChantModal(chantId = null) {
           const p = zone.querySelector('p');
           if (p) {
             p.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${audioFile.fichier_nom}`;
+          }
+          if (audioFile) {
+            const previewContainer = document.getElementById('preview-drop-audio_' + type) || document.getElementById('preview-audio_' + type);
+            const zone = document.getElementById('drop-audio_' + type);
 
-            // Container for badges
-            const badgeContainer = document.createElement('div');
-            badgeContainer.className = 'd-flex justify-between align-center mt-2 w-100';
+            if (zone) zone.classList.add('has-file');
 
-            const badge = document.createElement('div');
-            badge.className = 'file-present-badge';
-            badge.innerHTML = '<i class="fas fa-cloud"></i> Sur le serveur';
+            if (previewContainer) {
+              const badgeContainer = document.createElement('div');
+              badgeContainer.className = 'badge-on-server d-flex justify-between align-center p-1 bg-light rounded mt-1';
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn btn-sm btn-danger delete-file-btn';
-            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteBtn.type = 'button';
-            deleteBtn.onclick = (e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              deleteAudioFile(chant.id, audioFile.id, type);
-            };
+              const badge = document.createElement('span');
+              badge.className = 'text-sm text-success';
+              badge.innerHTML = '<i class="fas fa-cloud"></i> Sur le serveur';
 
-            badgeContainer.appendChild(badge);
-            badgeContainer.appendChild(deleteBtn);
-            zone.appendChild(badgeContainer);
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'btn btn-xs btn-danger delete-file-btn';
+              deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+              deleteBtn.type = 'button';
+              deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                deleteAudioFile(chant.id, audioFile.id, type);
+              };
+
+              badgeContainer.appendChild(badge);
+              badgeContainer.appendChild(deleteBtn);
+              previewContainer.appendChild(badgeContainer);
+            }
           }
         }
       });
@@ -422,11 +426,14 @@ async function showChantModal(chantId = null) {
       // Partition check
       if (chant.partitions && chant.partitions.length > 0) {
         const partZone = document.getElementById('drop-partition');
+        const previewContainer = document.getElementById('preview-partition');
         if (partZone) {
           partZone.classList.add('has-file');
           const p = partZone.querySelector('p');
           if (p) p.innerHTML = '<i class="fas fa-file-pdf text-success"></i> Partitions présentes: ' + chant.partitions.length;
+        }
 
+        if (previewContainer) {
           // List partitions
           const listProp = document.createElement('div');
           listProp.className = 'partition-list mt-2 text-left';
@@ -435,15 +442,15 @@ async function showChantModal(chantId = null) {
             const item = document.createElement('div');
             item.className = 'd-flex justify-between align-center p-1 bg-light rounded mb-1';
             item.innerHTML = `
-                <span class="text-sm text-truncate" style="max-width: 150px;">${part.fichier_nom}</span>
-                <button type="button" class="btn btn-xs btn-danger" onclick="deletePartitionFile(${chant.id}, ${part.id}, event)">
-                    <i class="fas fa-trash"></i>
-                </button>
-              `;
+                  <span class="text-sm text-truncate" style="max-width: 150px;">${part.fichier_nom}</span>
+                  <button type="button" class="btn btn-xs btn-danger" onclick="deletePartitionFile(${chant.id}, ${part.id}, event)">
+                      <i class="fas fa-trash"></i>
+                  </button>
+                `;
             listProp.appendChild(item);
           });
 
-          partZone.appendChild(listProp);
+          previewContainer.appendChild(listProp);
         }
       }
 
@@ -614,58 +621,7 @@ function handleFileSelect(input, previewId) {
 // Global scope for onclicks
 window.editChant = showChantModal;
 window.deleteChant = deleteChant;
-window.downloadAllAssets = async (chantId) => {
-  try {
-    const chant = allChants.find(c => c.id === chantId);
-    if (!chant) return;
-
-    let filesToDownload = [];
-
-    if (chant.audio) {
-      chant.audio.forEach(a => {
-        // Force download by adding fl_attachment if it's a Cloudinary URL
-        let url = a.fichier_url;
-        if (url.includes('cloudinary.com') && !url.includes('fl_attachment')) {
-          url = url.replace('/upload/', '/upload/fl_attachment/');
-        }
-        filesToDownload.push({ url: url, name: a.fichier_nom });
-      });
-    }
-    if (chant.partitions) {
-      chant.partitions.forEach(p => {
-        let url = p.fichier_url;
-        if (url.includes('cloudinary.com') && !url.includes('fl_attachment')) {
-          url = url.replace('/upload/', '/upload/fl_attachment/');
-        }
-        filesToDownload.push({ url: url, name: p.fichier_nom });
-      });
-    }
-
-    if (filesToDownload.length === 0) {
-      toast.info("Aucun fichier à télécharger pour ce chant.");
-      return;
-    }
-
-    toast.info(`Téléchargement de ${filesToDownload.length} fichiers...`);
-
-    filesToDownload.forEach((file, index) => {
-      setTimeout(() => {
-        // Create an iframe to trigger download silently, or just open in new tab
-        // Opening in new tab is safer for CORS/Cloudinary
-        const link = document.createElement('a');
-        link.href = file.url;
-        link.target = '_blank';
-        // download attribute often ignored for cross-origin, but fl_attachment handles it
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }, index * 800);
-    });
-
-  } catch (error) {
-    toast.error("Erreur lors du téléchargement : " + error.message);
-  }
-};
+// function downloadAllAssets removed
 
 window.deleteAudioFile = async (chantId, audioId, type) => {
   if (!confirm('Supprimer ce fichier audio ?')) return;

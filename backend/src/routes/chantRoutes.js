@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getChants, getChantById, createChant, updateChant, deleteChant } = require('../controllers/chantController');
 const { protect, admin } = require('../middleware/authMiddleware');
-const { upload } = require('../config/cloudinary');
+const { upload } = require('../middleware/upload');
 
 router.get('/', getChants);
 router.get('/:id', getChantById);

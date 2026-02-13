@@ -77,12 +77,12 @@ async function renderDetailChant(chantId) {
                 chant.partitions.map(p => `
                                             <div class="partition-item">
                                                 <span><i class="far fa-file-pdf"></i> ${p.voix}</span>
-                                                <a href="${p.fichier_url}" target="_blank" class="btn btn-sm btn-outline">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
+                                                <button class="btn btn-sm btn-outline" onclick="openPartitionModal('${p.fichier_url}', '${p.voix}')" title="Voir la partition">
+                                                    <i class="fas fa-eye"></i> Voir
+                                                </button>
                                             </div>
                                         `).join('') :
-                '<p>Aucune partition disponible</p>'
+                '<p class="text-muted">Aucune partition disponible.</p>'
             }
                                 </div>
                             </section>
@@ -143,3 +143,62 @@ window.playSpecificAudio = playSpecificAudio;
 
 // Register route
 router.register('chant', renderDetailChant);
+
+// Partition Modal Functions
+window.openPartitionModal = (url, voix) => {
+    const modal = document.getElementById('partitionModal');
+    const iframe = document.getElementById('pdfViewer');
+    const title = document.getElementById('partitionModalTitle');
+    const playBtn = document.getElementById('modalPlayBtn');
+
+    if (!modal || !iframe || !title) return;
+
+    title.innerText = `Partition - ${voix}`;
+
+    // Show loading overlay
+    const overlay = document.getElementById('pdfLoadingOverlay');
+    if (overlay) overlay.style.display = 'flex';
+
+    // Direct embed for speed
+    iframe.src = url;
+
+    // Hide overlay when iframe loads
+    iframe.onload = () => {
+        if (overlay) overlay.style.display = 'none';
+    };
+
+    if (playBtn) {
+        playBtn.style.display = 'inline-block';
+        playBtn.onclick = () => {
+            const detailPlayBtn = document.querySelector('.detail-actions .btn-primary');
+            if (detailPlayBtn) detailPlayBtn.click();
+        };
+    }
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+window.closePartitionModal = () => {
+    const modal = document.getElementById('partitionModal');
+    const iframe = document.getElementById('pdfViewer');
+
+    if (!modal || !iframe) return;
+
+    modal.style.display = 'none';
+    iframe.src = ''; // Clear iframe to stop loading
+    document.body.style.overflow = 'auto';
+};
+
+// Global Close modal handler (Close on click outside)
+window.addEventListener('click', (event) => {
+    if (event.target.classList.contains('modal')) {
+        const modalId = event.target.id;
+        if (modalId === 'partitionModal') {
+            window.closePartitionModal();
+        } else {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+});

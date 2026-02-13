@@ -30,7 +30,9 @@ const storage = new CloudinaryStorage({
         const params = {
             folder: folder,
             resource_type: resource_type,
-            public_id: `${Date.now()}-${fileName}`
+            public_id: `${Date.now()}-${fileName}`,
+            type: 'upload', // Explicitly public
+            access_mode: 'public'
         };
 
         // Only specify format for non-raw files

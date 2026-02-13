@@ -1,0 +1,93 @@
+/* ===================================
+   RESPONSIVE STYLES (MOBILE FIRST)
+   =================================== */
+
+/* Grids */
+@media (max-width: 768px) {
+    .chants-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Navbar & Mobile Menu */
+@media (max-width: 768px) {
+    .nav-menu {
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: var(--color-white);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-lg);
+        transition: 0.3s ease-in-out;
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        right: 0;
+    }
+
+    .nav-actions {
+        display: none;
+    }
+
+    .nav-link {
+        font-size: 1.25rem;
+    }
+
+    /* Hamburger Menu Animation */
+    .nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -6px);
+    }
+}
+
+/* Modals on Mobile */
+@media (max-width: 576px) {
+    .modal-content {
+        padding: var(--spacing-md);
+        max-height: 100vh;
+        height: 100%;
+        border-radius: 0;
+    }
+
+    .modal-xl {
+        height: 100vh;
+    }
+}
+
+/* Layout Utilities */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 var(--spacing-md);
+    }
+
+    .detail-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .detail-actions .btn {
+        width: 100%;
+    }
+}

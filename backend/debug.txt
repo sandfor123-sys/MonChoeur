@@ -1,0 +1,7 @@
+Cloud Name: OK
+Listing video resources...
+Video check: Found 1
+First video mode: undefined, type: upload
+Listing raw resources...
+Raw check: Found 1
+First raw mode: undefined, type: upload

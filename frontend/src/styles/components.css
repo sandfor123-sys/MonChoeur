@@ -105,27 +105,120 @@
 
 /* Modals */
 .modal {
-    display: none;
     position: fixed;
-    z-index: 2000;
+    z-index: 5000;
+    /* Way above audio player */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-md);
 }
 
 .modal-content {
     background-color: var(--color-white);
-    margin: 5% auto;
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     border-radius: var(--radius-lg);
-    width: 80%;
+    width: 90%;
     max-width: 800px;
+    margin: auto;
+    /* Restored for better centering */
     box-shadow: var(--shadow-xl);
     max-height: 90vh;
     overflow-y: auto;
+    /* Restored for tall forms */
+    position: relative;
+    animation: modalSlideUp 0.3s ease;
+}
+
+/* Modal sizing variants */
+.modal-sm {
+    max-width: 400px;
+}
+
+.modal-lg {
+    max-width: 1000px;
+}
+
+.modal-xl {
+    width: 80%;
+    max-width: 1400px;
+    height: 85vh;
+}
+
+/* Special flex layout for modals that need to fill height (like PDF) */
+.modal-content-flex {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-xl {
+    max-width: 95%;
+    width: 1300px;
+    height: 92vh;
+}
+
+/* PDF Viewer Specifics */
+.pdf-viewer-container {
+    position: relative;
+    flex-grow: 1;
+    background: #f0f0f0;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pdf-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-gray-light);
+    border-top: 4px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .modal-header {
@@ -555,6 +648,66 @@
     max-width: 400px;
 }
 
+.modal-xl {
+    max-width: 95%;
+    width: 1200px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.pdf-viewer-container {
+    flex-grow: 1;
+    background: #f1f5f9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-top: var(--spacing-md);
+}
+
+.pdf-viewer-container iframe {
+    border: none;
+    background: white;
+}
+
+/* Sidebar Modal (Desktop) */
+@media (min-width: 992px) {
+    .modal-sidebar {
+        justify-content: flex-end;
+        align-items: stretch;
+    }
+
+    .modal-sidebar .modal-content {
+        margin: 0;
+        width: 40vw;
+        /* 40% of screen width */
+        min-width: 500px;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0;
+        animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+}
+
+/* Mobile full-screen modal fallback */
+@media (max-width: 991px) {
+    .modal-sidebar .modal-content {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border-radius: 0;
+    }
+}
+
 .w-100 {
     width: 100%;
 }
@@ -693,7 +846,8 @@
     color: var(--color-white);
     padding: var(--spacing-md) 0;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-    z-index: 1500;
+    z-index: 6000;
+    /* Increased to be above modal (5000) */
     transition: transform var(--transition-base);
 }
 
@@ -720,85 +874,30 @@
     gap: var(--spacing-md);
 }
 
-/* Humble Hero */
-.hero-humble {
-    padding: 120px 0;
-    text-align: center;
-    background: radial-gradient(circle at center, #f8fafc 0%, #f1f5f9 100%);
-}
-
-.hero-content-v3 {
-    max-width: 700px;
-    margin: 0 auto;
-}
-
-.hero-mission-tag {
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-md);
-    display: inline-block;
-}
-
-.hero-title-v3 {
-    font-size: 3rem;
-    color: var(--color-black);
-    margin-bottom: var(--spacing-md);
-    font-family: 'Playfair Display', serif;
-}
-
-.hero-subtitle-v3 {
-    font-size: 1.25rem;
-    color: var(--color-gray);
-    line-height: 1.6;
-    margin-bottom: var(--spacing-xl);
-}
-
-.hero-actions-v3 {
-    display: flex;
-    justify-content: center;
+/* Reverted Admin/Hero experimental styles that messed up the layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--spacing-md);
 }
 
-/* Admin UI Alignment Fixes */
-.page-header.d-flex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-lg);
+.form-group {
+    margin-bottom: var(--spacing-md);
 }
 
-.admin-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
 }
 
-.stat-card {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-xl);
-    background: white;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--color-gray-light);
-    min-height: 120px;
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    margin-right: var(--spacing-md);
+    border-radius: var(--radius-md);
 }
 
 /* Catalogue Controls - Modern Bar */
