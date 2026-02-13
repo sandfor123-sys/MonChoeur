@@ -1,0 +1,27 @@
+{
+  "id": 22,
+  "titre": "Test",
+  "compositeur": "Test",
+  "parolier": "Test",
+  "categorie": "entree",
+  "temps_liturgique": "ordinaire",
+  "difficulte": "moyen",
+  "duree": null,
+  "paroles": "tvyeb",
+  "description": "jnk,",
+  "created_at": "2026-02-13T00:03:04.503499+00:00",
+  "updated_at": "2026-02-13T00:03:04.503499+00:00",
+  "audio": [
+    {
+      "id": 8,
+      "type": "voix_separee",
+      "voix": "basse",
+      "duree": null,
+      "chant_id": 22,
+      "created_at": "2026-02-13T01:17:31.014142+00:00",
+      "fichier_nom": "pitiÃ© seigneur car nous avons pÃ©chÃ©.ogg",
+      "fichier_url": "https://res.cloudinary.com/monchoeur/video/upload/v1770945448/monchoeur/others/1770945423399-piti%C3%83%C2%A9%20seigneur%20car%20nous%20avons%20p%C3%83%C2%A9ch%C3%83%C2%A9.ogg"
+    }
+  ],
+  "partitions": []
+}

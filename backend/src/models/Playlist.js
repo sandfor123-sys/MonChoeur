@@ -7,7 +7,7 @@ class Playlist {
             .from('playlists')
             .select(`
                 *,
-                playlist_chants!left(count)
+                playlist_chants(count)
             `)
             .eq('user_id', user_id)
             .order('created_at', { ascending: false });

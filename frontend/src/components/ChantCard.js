@@ -1,32 +1,37 @@
 // ChantCard Component
 function createChantCard(chant) {
   return `
-    <div class="chant-card" data-id="${chant.id}">
+    <div class="chant-card glass glow-hover" data-id="${chant.id}">
       <div class="chant-card-header">
+        <span class="chant-category-pill">${chant.categorie}</span>
         <h3 class="chant-title">${chant.titre}</h3>
-        <span class="chant-category">${chant.categorie}</span>
       </div>
       
       <div class="chant-card-body">
-        ${chant.compositeur ? `<p class="chant-composer"><i class="fas fa-user"></i> ${chant.compositeur}</p>` : ''}
-        ${chant.description ? `<p class="chant-description">${chant.description.substring(0, 100)}...</p>` : ''}
+        <div class="chant-info-minimal">
+          ${chant.compositeur ? `<span class="chant-composer-mini"><i class="fas fa-feather-alt"></i> ${chant.compositeur}</span>` : ''}
+          <span class="chant-difficulty-dot difficulty-${chant.difficulte}" title="Difficulté: ${chant.difficulte}"></span>
+        </div>
         
-        <div class="chant-meta">
-          <span class="chant-difficulty difficulty-${chant.difficulte}">
-            <i class="fas fa-signal"></i> ${chant.difficulte}
-          </span>
-          ${chant.temps_liturgique ? `<span class="chant-season"><i class="fas fa-calendar"></i> ${chant.temps_liturgique}</span>` : ''}
+        <p class="chant-description-v2">${chant.description ? chant.description.substring(0, 80) + '...' : 'Aucune description disponible.'}</p>
+        
+        <div class="chant-voices-v2">
+          <div class="voice-indicator ${chant.audio_soprano ? 'active' : ''}">S</div>
+          <div class="voice-indicator ${chant.audio_alto ? 'active' : ''}">A</div>
+          <div class="voice-indicator ${chant.audio_tenor ? 'active' : ''}">T</div>
+          <div class="voice-indicator ${chant.audio_basse ? 'active' : ''}">B</div>
+          ${chant.partition ? `<div class="voice-indicator active pdf" title="Partition"><i class="fas fa-file-pdf"></i></div>` : ''}
         </div>
       </div>
       
-      <div class="chant-card-footer">
-        <button class="btn btn-sm btn-primary" onclick="playChant(${chant.id})">
+      <div class="chant-card-footer-v2">
+        <button class="btn btn-primary btn-sm" onclick="playChant(${chant.id})">
           <i class="fas fa-play"></i> Écouter
         </button>
-        <button class="btn btn-sm btn-outline" onclick="viewChant(${chant.id})">
-          <i class="fas fa-eye"></i> Détails
+        <button class="btn btn-ghost btn-sm" onclick="viewChant(${chant.id})" title="Détails">
+          <i class="fas fa-info-circle"></i>
         </button>
-        <button class="btn btn-sm btn-icon" onclick="addToPlaylist(${chant.id})" title="Ajouter à une playlist">
+        <button class="btn btn-ghost btn-sm" onclick="addToPlaylist(${chant.id})" title="Playlists">
           <i class="fas fa-plus"></i>
         </button>
       </div>

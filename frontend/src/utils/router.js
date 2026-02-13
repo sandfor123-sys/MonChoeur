@@ -33,13 +33,31 @@ const router = {
             }
         });
 
-        // Execute route handler
-        const handler = this.routes[routeName];
-        if (handler) {
-            await handler(param);
-        } else {
-            console.warn(`Route not found: ${routeName}`);
-            this.navigate('#accueil');
+        // Execute route handler with safety
+        try {
+            const handler = this.routes[routeName];
+            if (handler) {
+                await handler(param);
+            } else {
+                console.warn(`Route not found: ${routeName}`);
+                this.navigate('#accueil');
+            }
+        } catch (error) {
+            console.error('Routing Error:', error);
+            const app = document.getElementById('app');
+            if (app) {
+                app.innerHTML = `
+                    <div class="container py-xl text-center">
+                        <i class="fas fa-exclamation-triangle text-warning mb-4" style="font-size: 3rem;"></i>
+                        <h2>Oops ! Une erreur est survenue</h2>
+                        <p class="text-muted mb-4">Nous n'avons pas pu charger cette page. Il se peut qu'il y ait un problème de connexion.</p>
+                        <button class="btn btn-primary" onclick="window.location.reload()">
+                            <i class="fas fa-sync"></i> Recharger la page
+                        </button>
+                    </div>
+                `;
+            }
+            toast.error('Erreur de chargement: ' + error.message);
         }
     },
 

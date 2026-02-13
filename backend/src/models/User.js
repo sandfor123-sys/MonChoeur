@@ -45,6 +45,26 @@ class User {
         if (error) throw error;
         return data.length > 0;
     }
+    static async findAll() {
+        const { data, error } = await supabase
+            .from('users')
+            .select('id, username, email, role, created_at')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    }
+
+    static async update(id, updates) {
+        const { data, error } = await supabase
+            .from('users')
+            .update(updates)
+            .eq('id', id)
+            .select();
+
+        if (error) throw error;
+        return data[0];
+    }
 }
 
 module.exports = User;

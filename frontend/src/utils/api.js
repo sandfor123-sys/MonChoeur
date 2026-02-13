@@ -40,6 +40,52 @@ const api = {
         }
     },
 
+    // XMLHTTPRequest for upload progress
+    upload(endpoint, formData, onProgress, method = 'POST') {
+        return new Promise((resolve, reject) => {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const token = localStorage.getItem('token');
+            const xhr = new XMLHttpRequest();
+
+            xhr.open(method, url, true);
+
+            if (token) {
+                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            }
+
+            if (onProgress) {
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        onProgress(percentComplete);
+                    }
+                };
+            }
+
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        resolve(data);
+                    } catch (e) {
+                        resolve(xhr.responseText);
+                    }
+                } else {
+                    try {
+                        const error = JSON.parse(xhr.responseText);
+                        reject(new Error(error.error || 'Erreur lors de l\'envoi'));
+                    } catch (e) {
+                        reject(new Error(xhr.statusText));
+                    }
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Erreur réseau'));
+
+            xhr.send(formData);
+        });
+    },
+
     // GET request
     async get(endpoint) {
         return this.request(endpoint, { method: 'GET' });
@@ -83,9 +129,10 @@ const api = {
             return api.get(`/chants?${params}`);
         },
         getById: (id) => api.get(`/chants/${id}`),
-        create: (data) => api.post('/chants', data),
         update: (id, data) => api.put(`/chants/${id}`, data),
-        delete: (id) => api.delete(`/chants/${id}`)
+        delete: (id) => api.delete(`/chants/${id}`),
+        uploadWithProgress: (data, onProgress) => api.upload('/chants', data, onProgress, 'POST'),
+        updateWithProgress: (id, data, onProgress) => api.upload(`/chants/${id}`, data, onProgress, 'PUT')
     },
 
     // Playlists endpoints
@@ -95,7 +142,14 @@ const api = {
         create: (data) => api.post('/playlists', data),
         update: (id, data) => api.put(`/playlists/${id}`, data),
         delete: (id) => api.delete(`/playlists/${id}`),
-        addChant: (playlistId, chantId) => api.post(`/playlists/${playlistId}/chants`, { chantId })
+        addChant: (playlistId, chantId) => api.post(`/playlists/${playlistId}/chants`, { chantId }),
+        removeChant: (playlistId, chantId) => api.delete(`/playlists/${playlistId}/chants/${chantId}`)
+    },
+
+    // Administrative endpoints
+    admin: {
+        getUsers: () => api.get('/auth/users'),
+        updateUserRole: (id, role) => api.put(`/auth/users/${id}`, { role })
     }
 };
 

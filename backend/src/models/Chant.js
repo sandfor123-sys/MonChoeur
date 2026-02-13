@@ -2,7 +2,8 @@ const { supabase, handleResponse } = require('../config/database');
 
 class Chant {
     static async findAll(filters = {}) {
-        let query = supabase.from('chants').select('*');
+        // Include audio_files (aliased as audio) and partitions relations
+        let query = supabase.from('chants').select('*, audio:audio_files(*), partitions(*)');
 
         if (filters.categorie) {
             query = query.eq('categorie', filters.categorie);

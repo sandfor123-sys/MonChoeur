@@ -15,9 +15,64 @@ async function renderAdmin() {
             <h1><i class="fas fa-user-shield"></i> Administration</h1>
             <p>Gérez le catalogue des chants</p>
           </div>
-          <button class="btn btn-primary" id="btnNewChant">
-            <i class="fas fa-plus"></i> Nouveau Chant
-          </button>
+          <div class="d-flex gap-sm">
+            <button class="btn btn-outline" id="btnManageUsers">
+              <i class="fas fa-users-cog"></i> Utilisateurs
+            </button>
+            <button class="btn btn-primary" id="btnNewChant">
+              <i class="fas fa-plus"></i> Nouveau Chant
+            </button>
+          </div>
+        </div>
+
+        <div id="adminStats" class="admin-stats-grid mb-4">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-music"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="statTotalChants">-</span>
+              <span class="stat-label">Total Chants</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon text-success"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="statCompleteChants">-</span>
+              <span class="stat-label">Complets (SATB)</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon text-warning"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="stat-info">
+              <span class="stat-value" id="statMissingChants">-</span>
+              <span class="stat-label">Voix manquantes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-controls mb-4">
+          <div class="search-filter-bar">
+            <div class="search-input">
+              <i class="fas fa-search"></i>
+              <input type="text" id="adminSearchInput" placeholder="Rechercher un chant...">
+            </div>
+            <div class="filter-select">
+              <select id="adminCategoryFilter">
+                <option value="all">Toutes les catégories</option>
+                <option value="entree">Entrée</option>
+                <option value="kyrie">Kyrie</option>
+                <option value="gloria">Gloria</option>
+                <option value="psaume">Psaume</option>
+                <option value="alleluia">Alléluia</option>
+                <option value="priere_universelle">Prière Universelle</option>
+                <option value="offertoire">Offertoire</option>
+                <option value="sanctus">Sanctus</option>
+                <option value="agnus">Agnus Dei</option>
+                <option value="communion">Communion</option>
+                <option value="envoi">Envoi</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <div id="adminChantsContainer" class="admin-table-container">
@@ -101,31 +156,64 @@ async function renderAdmin() {
             <label>Fichiers Audio (S, A, T, B)</label>
             <div class="form-grid">
               <div class="form-group">
-                <label for="audio_complet">Complet</label>
-                <input type="file" id="audio_complet" name="audio_complet" accept="audio/*">
+                <label>Complet</label>
+                <div class="drop-zone" id="drop-audio_complet">
+                  <p><i class="fas fa-cloud-upload-alt"></i> Glisser ou cliquer</p>
+                  <input type="file" id="audio_complet" name="audio_complet" accept="audio/*" onchange="handleFileSelect(this, 'preview-audio_complet')">
+                </div>
+                <div id="preview-audio_complet" class="preview-container"></div>
               </div>
               <div class="form-group">
-                <label for="audio_soprano">Soprano</label>
-                <input type="file" id="audio_soprano" name="audio_soprano" accept="audio/*">
+                <label>Soprano</label>
+                <div class="drop-zone" id="drop-audio_soprano">
+                   <p>S</p>
+                   <input type="file" id="audio_soprano" name="audio_soprano" accept="audio/*" onchange="handleFileSelect(this, 'preview-audio_soprano')">
+                </div>
+                <div id="preview-audio_soprano" class="preview-container"></div>
               </div>
               <div class="form-group">
-                <label for="audio_alto">Alto</label>
-                <input type="file" id="audio_alto" name="audio_alto" accept="audio/*">
+                <label>Alto</label>
+                <div class="drop-zone" id="drop-audio_alto">
+                   <p>A</p>
+                   <input type="file" id="audio_alto" name="audio_alto" accept="audio/*" onchange="handleFileSelect(this, 'preview-audio_alto')">
+                </div>
+                <div id="preview-audio_alto" class="preview-container"></div>
               </div>
               <div class="form-group">
-                <label for="audio_tenor">Ténor</label>
-                <input type="file" id="audio_tenor" name="audio_tenor" accept="audio/*">
+                <label>Ténor</label>
+                <div class="drop-zone" id="drop-audio_tenor">
+                   <p>T</p>
+                   <input type="file" id="audio_tenor" name="audio_tenor" accept="audio/*" onchange="handleFileSelect(this, 'preview-audio_tenor')">
+                </div>
+                <div id="preview-audio_tenor" class="preview-container"></div>
               </div>
               <div class="form-group">
-                <label for="audio_basse">Basse</label>
-                <input type="file" id="audio_basse" name="audio_basse" accept="audio/*">
+                <label>Basse</label>
+                <div class="drop-zone" id="drop-audio_basse">
+                   <p>B</p>
+                   <input type="file" id="audio_basse" name="audio_basse" accept="audio/*" onchange="handleFileSelect(this, 'preview-audio_basse')">
+                </div>
+                <div id="preview-audio_basse" class="preview-container"></div>
               </div>
               <div class="form-group">
-                <label for="partition">Partition (PDF)</label>
-                <input type="file" id="partition" name="partition" accept=".pdf">
+                <label>Partition (PDF)</label>
+                <div class="drop-zone" id="drop-partition">
+                    <p><i class="fas fa-file-pdf"></i> PDF</p>
+                    <input type="file" id="partition" name="partition" accept=".pdf" onchange="handleFileSelect(this, 'preview-partition')">
+                </div>
+                <div id="preview-partition" class="preview-container"></div>
               </div>
             </div>
+            
             <div id="mediaStatus" class="mt-2 text-sm text-muted"></div>
+            
+            <!-- Progress Bar -->
+            <div id="uploadProgress" class="mt-2" style="display: none;">
+                <label>Progression de l'envoi:</label>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="uploadProgressBar" style="width: 0%"></div>
+                </div>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -137,10 +225,18 @@ async function renderAdmin() {
     </div>
   `;
 
-  // Load admin chants
-  await loadAdminChants();
+  // Event Listeners for search and filters
+  const searchInput = document.getElementById('adminSearchInput');
+  const categoryFilter = document.getElementById('adminCategoryFilter');
 
-  // Event Listeners
+  const updateFilters = () => {
+    loadAdminChants(searchInput.value, categoryFilter.value);
+  };
+
+  searchInput.addEventListener('input', updateFilters);
+  categoryFilter.addEventListener('change', updateFilters);
+
+  document.getElementById('btnManageUsers').addEventListener('click', () => router.navigate('#admin-users'));
   document.getElementById('btnNewChant').addEventListener('click', () => showChantModal());
   document.querySelectorAll('.close-modal').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -149,12 +245,29 @@ async function renderAdmin() {
   });
 
   document.getElementById('chantForm').addEventListener('submit', handleChantSubmit);
+
+  // Initial load
+  loadAdminChants();
 }
 
-async function loadAdminChants() {
+async function loadAdminChants(search = '', category = 'all') {
   const container = document.getElementById('adminChantsContainer');
   try {
-    const chants = await api.chants.getAll();
+    const filters = {};
+    if (search) filters.search = search;
+    if (category !== 'all') filters.categorie = category;
+
+    const chants = await api.chants.getAll(filters);
+
+    // Update Stats Safely
+    const statTotal = document.getElementById('statTotalChants');
+    const statComplete = document.getElementById('statCompleteChants');
+    const statMissing = document.getElementById('statMissingChants');
+
+    if (statTotal) statTotal.textContent = chants.length;
+    let completeCount = chants.filter(c => c.audio_count >= 4).length;
+    if (statComplete) statComplete.textContent = completeCount;
+    if (statMissing) statMissing.textContent = chants.length - completeCount;
 
     if (chants.length === 0) {
       container.innerHTML = '<p class="text-center">Aucun chant au catalogue.</p>';
@@ -179,8 +292,18 @@ async function loadAdminChants() {
               <td><span class="badge">${chant.categorie}</span></td>
               <td>${chant.compositeur || '-'}</td>
               <td>
-                ${chant.audio_count > 0 ? '<i class="fas fa-volume-up" title="Audio présent"></i>' : ''}
-                ${chant.partition_count > 0 ? '<i class="fas fa-file-pdf" title="Partition présente"></i>' : ''}
+                <div class="voice-indicators">
+                  ${['complet', 'soprano', 'alto', 'tenor', 'basse'].map(v => {
+      let hasVoice = false;
+      if (v === 'complet') {
+        hasVoice = (chant.audio || []).some(a => a.type === 'complet');
+      } else {
+        hasVoice = (chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === v);
+      }
+      const label = v.charAt(0).toUpperCase();
+      return `<span class="voice-tag ${hasVoice ? 'active' : ''}" title="${v}">${label}</span>`;
+    }).join('')}
+                </div>
               </td>
               <td class="admin-actions">
                 <button class="btn btn-sm btn-outline" onclick="editChant(${chant.id})">
@@ -207,7 +330,25 @@ async function showChantModal(chantId = null) {
   const title = document.getElementById('modalTitle');
 
   form.reset();
-  document.getElementById('mediaStatus').innerHTML = '';
+  const mediaStatus = document.getElementById('mediaStatus');
+  mediaStatus.innerHTML = '';
+  document.querySelectorAll('.preview-container').forEach(el => el.innerHTML = '');
+  document.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.classList.remove('has-file');
+    const badge = zone.querySelector('.file-present-badge');
+    if (badge) badge.remove();
+    // Restore default text if it was modified
+    const p = zone.querySelector('p');
+    if (p) {
+      if (zone.id.includes('complet')) p.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Glisser ou cliquer';
+      else if (zone.id.includes('soprano')) p.innerHTML = 'S';
+      else if (zone.id.includes('alto')) p.innerHTML = 'A';
+      else if (zone.id.includes('tenor')) p.innerHTML = 'T';
+      else if (zone.id.includes('basse')) p.innerHTML = 'B';
+      else if (zone.id.includes('partition')) p.innerHTML = '<i class="fas fa-file-pdf"></i> PDF';
+    }
+  });
+  document.getElementById('uploadProgress').style.display = 'none';
 
   if (chantId) {
     title.textContent = 'Modifier le Chant';
@@ -223,12 +364,60 @@ async function showChantModal(chantId = null) {
       document.getElementById('paroles').value = chant.paroles || '';
       document.getElementById('description').value = chant.description || '';
 
+      // Visual feedback for existing files
+      const voiceTypes = ['complet', 'soprano', 'alto', 'tenor', 'basse'];
+      voiceTypes.forEach(type => {
+        let hasFile = false;
+        if (type === 'complet') {
+          hasFile = (chant.audio || []).some(a => a.type === 'complet');
+        } else {
+          hasFile = (chant.audio || []).some(a => a.type === 'voix_separee' && a.voix === type);
+        }
+
+        const zone = document.getElementById(`drop-audio_${type}`);
+        if (zone && hasFile) {
+          zone.classList.add('has-file');
+          const p = zone.querySelector('p');
+          if (p) {
+            p.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${type === 'complet' ? 'Audio Complet' : type.charAt(0).toUpperCase()} (Présent)`;
+            const badge = document.createElement('div');
+            badge.className = 'file-present-badge';
+            badge.innerHTML = '<i class="fas fa-cloud"></i> Sur le serveur';
+            zone.appendChild(badge);
+          }
+        }
+      });
+
+      // Partition check
+      if (chant.partitions && chant.partitions.length > 0) {
+        const partZone = document.getElementById('drop-partition');
+        if (partZone) {
+          partZone.classList.add('has-file');
+          const p = partZone.querySelector('p');
+          if (p) p.innerHTML = '<i class="fas fa-file-pdf text-success"></i> Partition (Présente)';
+          const badge = document.createElement('div');
+          badge.className = 'file-present-badge';
+          badge.innerHTML = '<i class="fas fa-cloud"></i> Sur le serveur';
+          partZone.appendChild(badge);
+        }
+      }
+
       if (chant.audio && chant.audio.length > 0) {
-        const voiceStatus = chant.audio.map(a => `<span><i class="fas fa-check-circle text-success"></i> ${a.voix}</span>`).join(' ');
-        document.getElementById('mediaStatus').innerHTML = `Audio(s) présent(s): ${voiceStatus}`;
+        const voiceLabels = {
+          complet: 'Complet',
+          soprano: 'S',
+          alto: 'A',
+          tenor: 'T',
+          basse: 'B'
+        };
+        const voiceStatus = chant.audio.map(a => {
+          const key = a.type === 'complet' ? 'complet' : a.voix;
+          return `<span><i class="fas fa-check-circle text-success"></i> ${voiceLabels[key] || key}</span>`;
+        }).join(' ');
+        mediaStatus.innerHTML = `Audio(s) présent(s): ${voiceStatus}`;
       }
       if (chant.partitions && chant.partitions.length > 0) {
-        document.getElementById('mediaStatus').innerHTML += `<br>Partition présente <i class="fas fa-file-pdf text-success"></i>`;
+        mediaStatus.innerHTML += (mediaStatus.innerHTML ? '<br>' : '') + `Partition présente <i class="fas fa-file-pdf text-success"></i>`;
       }
     } catch (error) {
       toast.error('Erreur lors de la récupération des détails');
@@ -239,6 +428,7 @@ async function showChantModal(chantId = null) {
   }
 
   modal.style.display = 'block';
+  setTimeout(setupDragAndDrop, 100);
 }
 
 async function handleChantSubmit(e) {
@@ -272,16 +462,24 @@ async function handleChantSubmit(e) {
 
   const chantId = document.getElementById('chantId').value;
   const btnSave = document.getElementById('btnSaveChant');
+  const progressContainer = document.getElementById('uploadProgress');
+  const progressBar = document.getElementById('uploadProgressBar');
 
   btnSave.disabled = true;
   btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+  progressContainer.style.display = 'block';
+  progressBar.style.width = '0%';
 
   try {
+    const onProgress = (percent) => {
+      progressBar.style.width = `${percent}%`;
+    };
+
     if (chantId) {
-      await api.chants.update(chantId, formData);
+      await api.chants.updateWithProgress(chantId, formData, onProgress);
       toast.success('Chant mis à jour avec succès');
     } else {
-      await api.chants.create(formData);
+      await api.chants.uploadWithProgress(formData, onProgress);
       toast.success('Chant créé avec succès');
     }
     document.getElementById('chantModal').style.display = 'none';
@@ -307,9 +505,57 @@ async function confirmDeleteChant(id, name) {
   }
 }
 
+function setupDragAndDrop() {
+  const dropZones = document.querySelectorAll('.drop-zone');
+
+  dropZones.forEach(zone => {
+    const input = zone.querySelector('input[type="file"]');
+    const previewId = input.getAttribute('onchange').match(/'([^']+)'/)[1];
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      zone.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      zone.addEventListener(eventName, () => zone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      zone.addEventListener(eventName, () => zone.classList.remove('dragover'), false);
+    });
+
+    zone.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length > 0) {
+        input.files = files;
+        handleFileSelect(input, previewId);
+      }
+    }, false);
+  });
+}
+
+function handleFileSelect(input, previewId) {
+  const preview = document.getElementById(previewId);
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    preview.innerHTML = `
+      <div class="file-preview-item">
+        <i class="fas ${file.type.includes('audio') ? 'fa-music' : 'fa-file-pdf'}"></i>
+        <span>${file.name}</span>
+        <span class="file-size">(${(file.size / 1024).toFixed(1)} KB)</span>
+      </div>
+    `;
+  }
+}
+
 // Global scope for onclicks
 window.editChant = showChantModal;
 window.confirmDeleteChant = confirmDeleteChant;
+window.handleFileSelect = handleFileSelect;
 
 // Register route
 router.register('admin', renderAdmin);

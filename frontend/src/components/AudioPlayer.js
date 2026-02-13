@@ -82,8 +82,17 @@ class AudioPlayer {
             return;
         }
 
-        // Use the first audio file (complet by default)
-        const audioFile = chant.audio[0];
+        // Priority logic: find "complet" (Tutti) first, then S, A, T, B
+        const priority = ['complet', 'soprano', 'alto', 'tenor', 'basse'];
+        let audioFile = null;
+
+        for (const type of priority) {
+            audioFile = chant.audio.find(a => a.type_voix === type);
+            if (audioFile) break;
+        }
+
+        // Fallback to first available if priority list fails
+        if (!audioFile) audioFile = chant.audio[0];
 
         if (this.currentChant && this.currentChant.id === chant.id) {
             this.togglePlayback();

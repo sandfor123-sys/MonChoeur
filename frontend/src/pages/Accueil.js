@@ -3,27 +3,22 @@ async function renderAccueil() {
   const app = document.getElementById('app');
 
   app.innerHTML = `
-    <div class="hero">
+    <div class="hero-humble">
       <div class="container">
-        <div class="hero-content">
-          <h1 class="hero-title">
-            <i class="fas fa-music"></i>
-            Bienvenue sur MonChœur
-          </h1>
-          <p class="hero-subtitle">
-            Votre plateforme d'apprentissage de chants choraux pour la messe
+        <div class="hero-content-v3 animate-fade-in">
+          <span class="hero-mission-tag">Servir la Liturgie</span>
+          <h1 class="hero-title-v3">Apprendre et chanter en chœur</h1>
+          <p class="hero-subtitle-v3">
+            Un compagnon simple pour aider chaque choriste à maîtriser sa voix 
+            et servir au mieux la prière de l'assemblée.
           </p>
-          <p class="hero-description">
-            Découvrez notre catalogue de chants liturgiques, écoutez les différentes voix,
-            téléchargez les partitions et créez vos playlists personnalisées.
-          </p>
-          <div class="hero-actions">
+          <div class="hero-actions-v3">
             <a href="#catalogue" class="btn btn-primary btn-lg">
-              <i class="fas fa-book"></i> Explorer le Catalogue
+              <i class="fas fa-book-open"></i> Parcourir le Catalogue
             </a>
             ${!auth.isAuthenticated() ? `
               <button class="btn btn-outline btn-lg" id="btnHeroRegister">
-                <i class="fas fa-user-plus"></i> S'inscrire Gratuitement
+                Nous rejoindre
               </button>
             ` : ''}
           </div>
@@ -43,41 +38,36 @@ async function renderAccueil() {
       </div>
     </div>
     
-    <div class="features">
+    <div class="features-section">
       <div class="container">
-        <h2 class="section-title text-center">Fonctionnalités</h2>
+        <div class="section-header text-center animate-fade-in">
+          <h2 class="section-title">Comment ça <span class="text-gradient">marche</span> ?</h2>
+          <p class="section-subtitle">Une approche moderne pour l'apprentissage du chant choral</p>
+        </div>
         
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-book-open"></i>
+        <div class="features-grid-v2">
+          <div class="feature-card-premium glass glow-hover animate-slide-up">
+            <div class="feature-icon-v2">
+              <i class="fas fa-layer-group"></i>
             </div>
-            <h3>Catalogue Complet</h3>
-            <p>Accédez à une large sélection de chants liturgiques organisés par catégorie et temps liturgique</p>
+            <h3>Apprentissage par Voix</h3>
+            <p>Isolez votre pupitre (Soprano, Alto, Ténor ou Basse) pour vous concentrer sur votre mélodie.</p>
           </div>
           
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-headphones"></i>
+          <div class="feature-card-premium glass glow-hover animate-slide-up" style="animation-delay: 0.1s">
+            <div class="feature-icon-v2">
+              <i class="fas fa-file-invoice"></i>
             </div>
-            <h3>Écoute Audio</h3>
-            <p>Écoutez chaque chant avec la possibilité d'isoler les différentes voix (soprano, alto, ténor, basse)</p>
+            <h3>Partitions Accessibles</h3>
+            <p>Consultez les partitions PDF directement depuis votre navigateur ou téléchargez-les pour vos répétitions.</p>
           </div>
           
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-file-pdf"></i>
+          <div class="feature-card-premium glass glow-hover animate-slide-up" style="animation-delay: 0.2s">
+            <div class="feature-icon-v2">
+              <i class="fas fa-list-ul"></i>
             </div>
-            <h3>Partitions</h3>
-            <p>Téléchargez les partitions au format PDF pour chaque voix</p>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">
-              <i class="fas fa-list"></i>
-            </div>
-            <h3>Playlists Personnalisées</h3>
-            <p>Créez et organisez vos propres listes de chants pour vos répétitions et célébrations</p>
+            <h3>Listes de Célébration</h3>
+            <p>Préparez vos messes en créant des playlists et partagez-les avec les autres membres du chœur.</p>
           </div>
         </div>
       </div>
